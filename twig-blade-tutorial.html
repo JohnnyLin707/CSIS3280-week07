@@ -105,7 +105,7 @@
   <div class="wrap">
     <div class="kicker">CSIS 3280 · Week 07 · Web Development</div>
     <h1>Twig 与 Blade 模板引擎 — 英中对照教程</h1>
-    <p>Twig: Include 模板、模板继承、Sandbox 与关注点分离；环境准备（Windows cmd / macOS Terminal 的 cd、Composer 安装与运行）；Blade 模板引擎基础、布局继承；Laravel 简介。左侧为课件英文原文，右侧为对应的中文翻译，代码块均可一键复制。</p>
+    <p>Twig: Include 模板、模板继承、Sandbox 与关注点分离；环境准备（Windows cmd / macOS Terminal 的 cd、Composer 安装与运行、安装排错）；Blade 模板引擎基础、布局继承；Laravel 简介。左侧为课件英文原文，右侧为对应的中文翻译，代码块均可一键复制。</p>
     <div class="legend">
       <span><i class="dot en"></i>左栏：English 原文</span>
       <span><i class="dot zh"></i>右栏：中文翻译</span>
@@ -123,12 +123,13 @@
     <a href="#s5">使用 Twig</a>
     <a href="#s6">Application 类</a>
     <a href="#s7">环境准备</a>
-    <a href="#s8">动手练习</a>
-    <a href="#s9">Twig vs Blade</a>
-    <a href="#s10">Blade 基础</a>
-    <a href="#s11">Blade 布局继承</a>
-    <a href="#s12">Laravel</a>
-    <a href="#s13">资源</a>
+    <a href="#s8">安装排错</a>
+    <a href="#s9">动手练习</a>
+    <a href="#s10">Twig vs Blade</a>
+    <a href="#s11">Blade 基础</a>
+    <a href="#s12">Blade 布局继承</a>
+    <a href="#s13">Laravel</a>
+    <a href="#s14">资源</a>
   </div>
 </nav>
 
@@ -628,9 +629,110 @@ php -S localhost:8000
     </div>
   </section>
 
-  <!-- ========== 8. Twig: Practice ========== -->
+  <!-- ========== 8. Troubleshooting: head conflict & Composer install ========== -->
   <section class="lesson" id="s8">
-    <h2><span class="num">8</span>Twig: Practice <small>· 动手练习步骤</small></h2>
+    <h2><span class="num">8</span>常见问题：安装 Composer 排错 <small>· Troubleshooting: 假 head 冲突与两种安装方式</small></h2>
+    <div class="cols">
+      <div class="col en" lang="en">
+        <div class="lang-tag">English · 原文</div>
+        <ul>
+          <li>A real case from class: on a Mac with <b>XAMPP</b> installed, the Homebrew installer aborted with <code>Unknown option: n ... Failed to query latest Homebrew/brew Git tag.</code></li>
+          <li><b>Cause:</b> XAMPP puts its <code>bin</code> folder at the <b>front</b> of PATH (duplicated lines in <code>~/.zshrc</code>). That folder contains a command also named <code>head</code> (an HTTP tool), which shadows the system <code>/usr/bin/head</code> and breaks scripts that use <code>head -n1</code>.</li>
+          <li>If PHP is already available (e.g. XAMPP), you do <b>not</b> need Homebrew at all — install Composer directly with the official installer (<b>Method A</b>, recommended).</li>
+          <li><b>Method B</b> (Homebrew) also works: re-run the installer with a "clean" PATH to bypass the fake head, then <code>brew install composer</code>. Note that brew installs its own PHP too, so you may end up with two PHPs on the machine.</li>
+          <li><b>Permanent fix:</b> in <code>~/.zshrc</code>, keep only one XAMPP line and put it at the <b>end</b> of PATH, then run <code>source ~/.zshrc</code>.</li>
+        </ul>
+      </div>
+      <div class="col zh">
+        <div class="lang-tag">中文 · 翻译</div>
+        <ul>
+          <li>课堂上的真实案例：装了 <b>XAMPP</b> 的 Mac 上，Homebrew 安装脚本中途报错 <code>Unknown option: n ... Failed to query latest Homebrew/brew Git tag.</code> 而中断。</li>
+          <li><b>原因：</b>XAMPP 把自己的 <code>bin</code> 文件夹加到了 PATH 的<b>最前面</b>（<code>~/.zshrc</code> 里还写了两行重复的）。这个文件夹里有一个恰好也叫 <code>head</code> 的命令（一个 HTTP 请求工具），它「遮住」了系统的 <code>/usr/bin/head</code>，导致使用 <code>head -n1</code> 的脚本全部出错。</li>
+          <li>如果机器上已经有 PHP（例如 XAMPP 自带），那<b>完全不需要</b> Homebrew——直接用官方安装脚本装 Composer 即可（<b>方式一</b>，推荐）。</li>
+          <li><b>方式二</b>（Homebrew）也可以：重新运行安装脚本时给 PATH 前面只放系统目录，绕开假 head，然后 <code>brew install composer</code>。注意 brew 会额外安装它自己的 PHP，机器上可能出现两个 PHP。</li>
+          <li><b>根治办法：</b>在 <code>~/.zshrc</code> 中只保留一行 XAMPP 配置，并把它放到 PATH 的<b>末尾</b>，然后执行 <code>source ~/.zshrc</code>。</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="code-card">
+      <div class="code-head">
+        <span class="file"><span class="lang-chip">shell</span><b>第 0 步：诊断问题（macOS Terminal）</b></span>
+        <span class="code-actions"><button class="copy-btn" type="button">复制代码</button></span>
+      </div>
+      <pre><code># 系统里的 head 是谁？
+which -a head
+# 正常第一行应是 /usr/bin/head；
+# 若第一行是 /Applications/XAMPP/xamppfiles/bin/head，即为“假 head”
+
+# 检查已有工具
+command -v php        # 例：/Applications/XAMPP/xamppfiles/bin/php（已有 PHP）
+command -v composer   # 没有输出 = 还没装 Composer
+command -v brew       # 没有输出 = Homebrew 没装好</code></pre>
+    </div>
+
+    <div class="code-card">
+      <div class="code-head">
+        <span class="file"><span class="lang-chip">shell</span><b>方式一（推荐）：官方安装脚本，无需 Homebrew</b></span>
+        <span class="code-actions"><button class="copy-btn" type="button">复制代码</button></span>
+      </div>
+      <pre><code># 前提：机器上已有 PHP（XAMPP 自带即可），在主目录执行
+cd ~
+
+# 1. 下载官方安装器，并用 php 运行
+curl -fsSL https://getcomposer.org/installer -o composer-setup.php
+php composer-setup.php
+
+# 2. 移动到全局命令目录（需要输入开机密码）
+sudo mkdir -p /usr/local/bin
+sudo mv composer.phar /usr/local/bin/composer
+
+# 3. 重新打开终端后验证
+composer --version
+php -v</code></pre>
+    </div>
+
+    <div class="code-card">
+      <div class="code-head">
+        <span class="file"><span class="lang-chip">shell</span><b>方式二：Homebrew（清洗 PATH 绕开假 head）</b></span>
+        <span class="code-actions"><button class="copy-btn" type="button">复制代码</button></span>
+      </div>
+      <pre><code># 1. 重新运行 Homebrew 安装脚本：
+#    在 PATH 最前面只放系统目录，绕开 XAMPP 的假 head
+PATH="/usr/bin:/bin:/usr/sbin:/sbin:$PATH" /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+# 2. 安装完成后，按脚本提示的 Next steps 把 brew 加入 PATH（M 系列芯片 Mac）：
+echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> ~/.zprofile
+eval "$(/opt/homebrew/bin/brew shellenv)"
+brew --version
+
+# 3. 安装 Composer（brew 会自动装上它自己的 PHP）
+brew install composer
+composer --version</code></pre>
+    </div>
+
+    <div class="code-card">
+      <div class="code-head">
+        <span class="file"><span class="lang-chip">shell</span><b>根治：修复 ~/.zshrc 里的 PATH 顺序</b></span>
+        <span class="code-actions"><button class="copy-btn" type="button">复制代码</button></span>
+      </div>
+      <pre><code># 打开 ~/.zshrc，删除重复的两行（它们把 XAMPP 排到最前，遮蔽系统命令）：
+#   export PATH="/Applications/XAMPP/xamppfiles/bin:$PATH"
+#   export PATH="/Applications/XAMPP/xamppfiles/bin:$PATH"
+# 只保留一行，并把 XAMPP 放到 PATH 末尾：
+export PATH="$PATH:/Applications/XAMPP/xamppfiles/bin"
+
+# 保存后重新加载配置
+source ~/.zshrc
+
+# 验证：head 现在应该是系统自带的
+which -a head</code></pre>
+    </div>
+  </section>
+
+  <!-- ========== 9. Twig: Practice ========== -->
+  <section class="lesson" id="s9">
+    <h2><span class="num">9</span>Twig: Practice <small>· 动手练习步骤</small></h2>
     <div class="cols">
       <div class="col en" lang="en">
         <div class="lang-tag">English · 原文</div>
@@ -682,9 +784,9 @@ composer dump-autoload</code></pre>
     </div>
   </section>
 
-  <!-- ========== 9. Twig vs Blade ========== -->
-  <section class="lesson" id="s9">
-    <h2><span class="num">9</span>Twig vs Blade <small>· 两种模板引擎对比</small></h2>
+  <!-- ========== 10. Twig vs Blade ========== -->
+  <section class="lesson" id="s10">
+    <h2><span class="num">10</span>Twig vs Blade <small>· 两种模板引擎对比</small></h2>
     <div class="cols">
       <div class="col en" lang="en">
         <div class="lang-tag">English · 原文</div>
@@ -724,9 +826,9 @@ composer dump-autoload</code></pre>
     </table>
   </section>
 
-  <!-- ========== 10. Blade template engines (basics) ========== -->
-  <section class="lesson" id="s10">
-    <h2><span class="num">10</span>Blade 模板引擎：基础语法 <small>· Blade Basics</small></h2>
+  <!-- ========== 11. Blade template engines (basics) ========== -->
+  <section class="lesson" id="s11">
+    <h2><span class="num">11</span>Blade 模板引擎：基础语法 <small>· Blade Basics</small></h2>
     <div class="cols">
       <div class="col en" lang="en">
         <div class="lang-tag">English · 原文</div>
@@ -779,9 +881,9 @@ composer dump-autoload</code></pre>
     </div>
   </section>
 
-  <!-- ========== 11. Blade naming & layout inheritance ========== -->
-  <section class="lesson" id="s11">
-    <h2><span class="num">11</span>Blade 模板引擎：命名与布局继承 <small>· File Naming &amp; Master Layout</small></h2>
+  <!-- ========== 12. Blade naming & layout inheritance ========== -->
+  <section class="lesson" id="s12">
+    <h2><span class="num">12</span>Blade 模板引擎：命名与布局继承 <small>· File Naming &amp; Master Layout</small></h2>
     <div class="cols">
       <div class="col en" lang="en">
         <div class="lang-tag">English · 原文</div>
@@ -855,9 +957,9 @@ composer dump-autoload</code></pre>
     </div>
   </section>
 
-  <!-- ========== 12. Laravel ========== -->
-  <section class="lesson" id="s12">
-    <h2><span class="num">12</span>Laravel 框架 <small>· Laravel Frameworks</small></h2>
+  <!-- ========== 13. Laravel ========== -->
+  <section class="lesson" id="s13">
+    <h2><span class="num">13</span>Laravel 框架 <small>· Laravel Frameworks</small></h2>
     <div class="cols">
       <div class="col en" lang="en">
         <div class="lang-tag">English · 原文</div>
@@ -880,9 +982,9 @@ composer dump-autoload</code></pre>
     </div>
   </section>
 
-  <!-- ========== 13. Resources ========== -->
-  <section class="lesson" id="s13">
-    <h2><span class="num">13</span>Resources <small>· 参考资料</small></h2>
+  <!-- ========== 14. Resources ========== -->
+  <section class="lesson" id="s14">
+    <h2><span class="num">14</span>Resources <small>· 参考资料</small></h2>
     <div class="cols">
       <div class="col en" lang="en">
         <div class="lang-tag">English · 原文</div>
