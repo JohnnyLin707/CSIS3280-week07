@@ -105,7 +105,7 @@
   <div class="wrap">
     <div class="kicker">CSIS 3280 · Week 07 · Web Development</div>
     <h1>Twig 与 Blade 模板引擎 — 英中对照教程</h1>
-    <p>Twig: Include 模板、模板继承、Sandbox 与关注点分离、Composer 安装实践；Blade 模板引擎基础、布局继承；Laravel 简介。左侧为课件英文原文，右侧为对应的中文翻译，代码块均可一键复制。</p>
+    <p>Twig: Include 模板、模板继承、Sandbox 与关注点分离；环境准备（Windows cmd / macOS Terminal 的 cd、Composer 安装与运行）；Blade 模板引擎基础、布局继承；Laravel 简介。左侧为课件英文原文，右侧为对应的中文翻译，代码块均可一键复制。</p>
     <div class="legend">
       <span><i class="dot en"></i>左栏：English 原文</span>
       <span><i class="dot zh"></i>右栏：中文翻译</span>
@@ -122,12 +122,13 @@
     <a href="#s4">Sandbox 与分离</a>
     <a href="#s5">使用 Twig</a>
     <a href="#s6">Application 类</a>
-    <a href="#s7">动手练习</a>
-    <a href="#s8">Twig vs Blade</a>
-    <a href="#s9">Blade 基础</a>
-    <a href="#s10">Blade 布局继承</a>
-    <a href="#s11">Laravel</a>
-    <a href="#s12">资源</a>
+    <a href="#s7">环境准备</a>
+    <a href="#s8">动手练习</a>
+    <a href="#s9">Twig vs Blade</a>
+    <a href="#s10">Blade 基础</a>
+    <a href="#s11">Blade 布局继承</a>
+    <a href="#s12">Laravel</a>
+    <a href="#s13">资源</a>
   </div>
 </nav>
 
@@ -495,9 +496,141 @@ $app-&gt;run();</code></pre>
     </div>
   </section>
 
-  <!-- ========== 7. Twig: Practice ========== -->
+  <!-- ========== 7. Setup: cd & Composer ========== -->
   <section class="lesson" id="s7">
-    <h2><span class="num">7</span>Twig: Practice <small>· 动手练习步骤</small></h2>
+    <h2><span class="num">7</span>环境准备：cd 进入文件夹与安装 Composer <small>· Setup: cd &amp; Composer（Windows cmd / macOS Terminal）</small></h2>
+    <div class="cols">
+      <div class="col en" lang="en">
+        <div class="lang-tag">English · 原文</div>
+        <ul>
+          <li>Open a terminal:
+            <ul>
+              <li>Windows: press <code>Win + R</code>, type <code>cmd</code> and press Enter (or search "Command Prompt" in the Start menu).</li>
+              <li>macOS: open <code>Terminal</code> via Spotlight (<code>Cmd + Space</code>, type "Terminal").</li>
+            </ul>
+          </li>
+          <li>Use <code>cd</code> (change directory) to enter your project folder. Windows paths use backslash <code>\</code>; macOS paths use forward slash <code>/</code>, and <code>~</code> means your home folder.</li>
+          <li>List the folder contents with <code>dir</code> (Windows) or <code>ls</code> (macOS) to confirm you are in the right place; <code>cd ..</code> goes up one level.</li>
+          <li>Install Composer (the dependency manager for PHP):
+            <ul>
+              <li>Windows: download and run <code>Composer-Setup.exe</code> from getcomposer.org — it locates your PHP automatically; reopen cmd after installing.</li>
+              <li>macOS: install with Homebrew (<code>brew install composer</code>) or the official installer script.</li>
+            </ul>
+          </li>
+          <li>Verify with <code>composer --version</code> and <code>php -v</code>, then install the Twig component and run the project from the folder that contains <code>composer.json</code> / <code>index.php</code>.</li>
+        </ul>
+      </div>
+      <div class="col zh">
+        <div class="lang-tag">中文 · 翻译</div>
+        <ul>
+          <li>打开终端：
+            <ul>
+              <li>Windows：按 <code>Win + R</code>，输入 <code>cmd</code> 回车（或在开始菜单搜索「命令提示符」）。</li>
+              <li>macOS：用 Spotlight（<code>Cmd + 空格</code>）搜索并打开「终端 Terminal」。</li>
+            </ul>
+          </li>
+          <li>用 <code>cd</code>（change directory，切换目录）进入项目文件夹。Windows 路径用反斜杠 <code>\</code>；macOS 路径用正斜杠 <code>/</code>，<code>~</code> 代表你的用户主目录。</li>
+          <li>用 <code>dir</code>（Windows）或 <code>ls</code>（macOS）列出文件夹内容，确认位置正确；<code>cd ..</code> 返回上一级。</li>
+          <li>安装 Composer（PHP 的依赖管理工具）：
+            <ul>
+              <li>Windows：到 getcomposer.org 下载 <code>Composer-Setup.exe</code> 双击安装——它会自动定位你的 PHP；安装完成后要重新打开 cmd。</li>
+              <li>macOS：用 Homebrew 安装（<code>brew install composer</code>），或使用官方安装脚本。</li>
+            </ul>
+          </li>
+          <li>用 <code>composer --version</code> 和 <code>php -v</code> 验证安装；然后在包含 <code>composer.json</code> / <code>index.php</code> 的项目文件夹中安装 Twig 组件并运行项目。</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="code-card">
+      <div class="code-head">
+        <span class="file"><span class="lang-chip">cmd</span><b>Windows（cmd）：cd 进入项目文件夹</b></span>
+        <span class="code-actions"><button class="copy-btn" type="button">复制代码</button></span>
+      </div>
+      <pre><code>:: 打开命令提示符：Win + R → 输入 cmd → 回车
+:: Windows 路径使用反斜杠 \（把下面的路径换成你自己的）
+
+:: 1. 进入项目文件夹
+cd C:\Users\YourName\Downloads\CSIS3280-week07\3280week07_starter
+
+:: 2. 列出当前文件夹内容，确认位置正确
+dir
+
+:: 3. 返回上一级文件夹（备用）
+cd ..</code></pre>
+    </div>
+
+    <div class="code-card">
+      <div class="code-head">
+        <span class="file"><span class="lang-chip">shell</span><b>macOS（Terminal）：cd 进入项目文件夹</b></span>
+        <span class="code-actions"><button class="copy-btn" type="button">复制代码</button></span>
+      </div>
+      <pre><code># 打开终端：Spotlight（Cmd + 空格）→ 搜索 Terminal
+# macOS 路径使用正斜杠 / ，~ 代表主目录 /Users/yourname
+
+# 1. 进入项目文件夹
+cd ~/Downloads/CSIS3280-week07/3280week07_starter
+
+# 2. 列出当前文件夹内容，确认位置正确
+ls
+
+# 3. 返回上一级文件夹（备用）
+cd ..</code></pre>
+    </div>
+
+    <div class="code-card">
+      <div class="code-head">
+        <span class="file"><span class="lang-chip">cmd</span><b>Windows（cmd）：安装 Composer</b></span>
+        <span class="code-actions"><button class="copy-btn" type="button">复制代码</button></span>
+      </div>
+      <pre><code>:: 1. 打开 https://getcomposer.org/download/
+:: 2. 下载 Composer-Setup.exe 并双击安装
+::    （安装器会自动定位 PHP；若未安装 PHP，也可以由安装器一并安装）
+:: 3. 安装完成后【重新打开】cmd，然后验证：
+
+composer --version
+
+:: 顺便确认 PHP 可用
+php -v</code></pre>
+    </div>
+
+    <div class="code-card">
+      <div class="code-head">
+        <span class="file"><span class="lang-chip">shell</span><b>macOS（Terminal）：安装 Composer</b></span>
+        <span class="code-actions"><button class="copy-btn" type="button">复制代码</button></span>
+      </div>
+      <pre><code># 方式一：Homebrew（推荐，Homebrew 安装见 https://brew.sh）
+brew install composer
+
+# 方式二：官方安装脚本（没有 Homebrew 时）
+php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
+php composer-setup.php
+sudo mv composer.phar /usr/local/bin/composer
+
+# 验证安装
+composer --version
+php -v</code></pre>
+    </div>
+
+    <div class="code-card">
+      <div class="code-head">
+        <span class="file"><span class="lang-chip">shell</span><b>在项目中安装 Twig 组件并运行（Windows / macOS 相同）</b></span>
+        <span class="code-actions"><button class="copy-btn" type="button">复制代码</button></span>
+      </div>
+      <pre><code># 在 composer.json 所在的项目根目录执行（详细步骤见下一节 Twig: Practice）
+composer require twig/twig
+composer dump-autoload
+
+# 用 PHP 内置服务器运行项目（在含 index.php 的文件夹，如 public/）
+php -S localhost:8000
+
+# 浏览器打开 http://localhost:8000</code></pre>
+    </div>
+  </section>
+
+  <!-- ========== 8. Twig: Practice ========== -->
+  <section class="lesson" id="s8">
+    <h2><span class="num">8</span>Twig: Practice <small>· 动手练习步骤</small></h2>
     <div class="cols">
       <div class="col en" lang="en">
         <div class="lang-tag">English · 原文</div>
@@ -549,9 +682,9 @@ composer dump-autoload</code></pre>
     </div>
   </section>
 
-  <!-- ========== 8. Twig vs Blade ========== -->
-  <section class="lesson" id="s8">
-    <h2><span class="num">8</span>Twig vs Blade <small>· 两种模板引擎对比</small></h2>
+  <!-- ========== 9. Twig vs Blade ========== -->
+  <section class="lesson" id="s9">
+    <h2><span class="num">9</span>Twig vs Blade <small>· 两种模板引擎对比</small></h2>
     <div class="cols">
       <div class="col en" lang="en">
         <div class="lang-tag">English · 原文</div>
@@ -591,9 +724,9 @@ composer dump-autoload</code></pre>
     </table>
   </section>
 
-  <!-- ========== 9. Blade template engines (basics) ========== -->
-  <section class="lesson" id="s9">
-    <h2><span class="num">9</span>Blade 模板引擎：基础语法 <small>· Blade Basics</small></h2>
+  <!-- ========== 10. Blade template engines (basics) ========== -->
+  <section class="lesson" id="s10">
+    <h2><span class="num">10</span>Blade 模板引擎：基础语法 <small>· Blade Basics</small></h2>
     <div class="cols">
       <div class="col en" lang="en">
         <div class="lang-tag">English · 原文</div>
@@ -646,9 +779,9 @@ composer dump-autoload</code></pre>
     </div>
   </section>
 
-  <!-- ========== 10. Blade naming & layout inheritance ========== -->
-  <section class="lesson" id="s10">
-    <h2><span class="num">10</span>Blade 模板引擎：命名与布局继承 <small>· File Naming &amp; Master Layout</small></h2>
+  <!-- ========== 11. Blade naming & layout inheritance ========== -->
+  <section class="lesson" id="s11">
+    <h2><span class="num">11</span>Blade 模板引擎：命名与布局继承 <small>· File Naming &amp; Master Layout</small></h2>
     <div class="cols">
       <div class="col en" lang="en">
         <div class="lang-tag">English · 原文</div>
@@ -722,9 +855,9 @@ composer dump-autoload</code></pre>
     </div>
   </section>
 
-  <!-- ========== 11. Laravel ========== -->
-  <section class="lesson" id="s11">
-    <h2><span class="num">11</span>Laravel 框架 <small>· Laravel Frameworks</small></h2>
+  <!-- ========== 12. Laravel ========== -->
+  <section class="lesson" id="s12">
+    <h2><span class="num">12</span>Laravel 框架 <small>· Laravel Frameworks</small></h2>
     <div class="cols">
       <div class="col en" lang="en">
         <div class="lang-tag">English · 原文</div>
@@ -747,9 +880,9 @@ composer dump-autoload</code></pre>
     </div>
   </section>
 
-  <!-- ========== 12. Resources ========== -->
-  <section class="lesson" id="s12">
-    <h2><span class="num">12</span>Resources <small>· 参考资料</small></h2>
+  <!-- ========== 13. Resources ========== -->
+  <section class="lesson" id="s13">
+    <h2><span class="num">13</span>Resources <small>· 参考资料</small></h2>
     <div class="cols">
       <div class="col en" lang="en">
         <div class="lang-tag">English · 原文</div>
