@@ -1,0 +1,826 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Twig 与 Blade 模板引擎 — 双语教程 | CSIS3280 Week 07</title>
+<style>
+  :root{
+    --bg:#f5f6fa; --card:#ffffff; --ink:#1f2937; --muted:#64748b;
+    --brand:#4f46e5; --brand-soft:#eef2ff; --en:#4338ca;
+    --zh:#047857; --zh-soft:#f2fbf6; --border:#e5e7eb;
+    --code-bg:#0f172a; --code-head:#1e293b; --code-ink:#e2e8f0;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;background:var(--bg);color:var(--ink);line-height:1.7;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  }
+  .site-header{background:linear-gradient(135deg,#312e81 0%,#4f46e5 60%,#6366f1 100%);color:#fff;padding:44px 24px 36px}
+  .site-header .wrap{max-width:1180px;margin:0 auto}
+  .kicker{font-size:13px;letter-spacing:.12em;text-transform:uppercase;opacity:.85;font-weight:600}
+  .site-header h1{margin:10px 0 8px;font-size:30px;line-height:1.3}
+  .site-header p{margin:0;opacity:.92;max-width:860px}
+  .legend{display:flex;gap:12px;margin-top:18px;flex-wrap:wrap}
+  .legend span{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.28);padding:4px 13px;border-radius:999px;font-size:13px}
+  .dot{width:10px;height:10px;border-radius:50%;display:inline-block}
+  .dot.en{background:#c7d2fe}.dot.zh{background:#6ee7b7}
+
+  nav.toc{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.94);backdrop-filter:blur(8px);border-bottom:1px solid var(--border);padding:10px 24px}
+  nav.toc .wrap{max-width:1180px;margin:0 auto;display:flex;gap:8px;flex-wrap:wrap}
+  nav.toc a{font-size:13px;color:#334155;text-decoration:none;padding:3px 11px;border-radius:999px;border:1px solid var(--border);background:#fff;white-space:nowrap}
+  nav.toc a:hover{border-color:var(--brand);color:var(--brand)}
+
+  .wrap{max-width:1180px;margin:0 auto;padding:6px 24px 90px}
+
+  section.lesson{
+    background:var(--card);border:1px solid var(--border);border-radius:16px;
+    padding:26px 28px 28px;margin:26px 0;box-shadow:0 1px 3px rgba(15,23,42,.06);
+    scroll-margin-top:70px;
+  }
+  .lesson h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .lesson h2 small{color:var(--muted);font-weight:600;font-size:15px}
+  .num{flex:none;width:30px;height:30px;border-radius:9px;background:var(--brand-soft);color:var(--brand);
+    display:inline-flex;align-items:center;justify-content:center;font-size:14px;font-weight:800}
+
+  .cols{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  .col{border:1px solid var(--border);border-radius:12px;padding:14px 18px 16px}
+  .col.en{background:#fafbff}
+  .col.zh{background:var(--zh-soft)}
+  .lang-tag{font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px}
+  .col.en .lang-tag{color:var(--en)}
+  .col.zh .lang-tag{color:var(--zh)}
+  .col p{margin:8px 0}
+  .col ul,.col ol{margin:8px 0;padding-left:20px}
+  .col li{margin:6px 0}
+
+  code.inline, .col code{
+    background:var(--brand-soft);color:#3730a3;border-radius:5px;padding:1px 6px;
+    font-family:var(--mono);font-size:.92em;
+  }
+
+  .code-card{margin-top:18px;border-radius:12px;overflow:hidden;border:1px solid #1e293b;box-shadow:0 2px 6px rgba(15,23,42,.12)}
+  .code-head{display:flex;justify-content:space-between;align-items:center;gap:10px;background:var(--code-head);color:#cbd5e1;padding:8px 14px;font-size:13px;font-family:var(--mono)}
+  .code-head .file{display:flex;align-items:center;gap:10px;min-width:0}
+  .code-head .file b{color:#f1f5f9;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .lang-chip{flex:none;font-size:11px;font-weight:700;color:#a5b4fc;border:1px solid #3730a3;background:#1e1b4b;border-radius:999px;padding:1px 9px;text-transform:lowercase}
+  .code-actions{display:flex;align-items:center;gap:8px;flex:none}
+  .copy-btn{background:#334155;color:#e2e8f0;border:1px solid #475569;border-radius:7px;padding:4px 13px;cursor:pointer;font-size:12px;font-family:inherit}
+  .copy-btn:hover{background:#475569}
+  .copy-btn.ok{background:#047857;border-color:#059669;color:#fff}
+  .code-card pre{margin:0;background:var(--code-bg);color:var(--code-ink);padding:15px 18px;overflow-x:auto;
+    font-family:var(--mono);font-size:13.5px;line-height:1.65}
+  .code-card code{font-family:var(--mono)}
+
+  table.cmp{width:100%;border-collapse:collapse;margin-top:18px;font-size:14.5px;background:#fff}
+  table.cmp th,table.cmp td{border:1px solid var(--border);padding:9px 13px;text-align:left;vertical-align:top}
+  table.cmp thead th{background:var(--brand-soft);color:#3730a3}
+  table.cmp tbody tr:nth-child(even){background:#fafafa}
+  table.cmp td:first-child{font-weight:700;white-space:nowrap}
+
+  .resources{list-style:none;padding:0;margin:0}
+  .resources li{margin:10px 0}
+  .resources a{color:var(--brand);text-decoration:none;word-break:break-all}
+  .resources a:hover{text-decoration:underline}
+  .extra-tag{display:inline-block;font-size:11px;font-weight:700;color:var(--zh);border:1px solid #a7f3d0;background:var(--zh-soft);border-radius:999px;padding:1px 9px;margin-left:8px;vertical-align:1px}
+
+  footer{border-top:1px solid var(--border);margin-top:30px;padding:26px 24px 40px;color:var(--muted);font-size:13px;text-align:center}
+
+  @media (max-width:900px){
+    .cols{grid-template-columns:1fr}
+    .site-header h1{font-size:24px}
+  }
+  @media print{
+    nav.toc,.copy-btn,.code-actions{display:none}
+    .code-card{box-shadow:none}
+    body{background:#fff}
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <div class="kicker">CSIS 3280 · Week 07 · Web Development</div>
+    <h1>Twig 与 Blade 模板引擎 — 英中对照教程</h1>
+    <p>Twig: Include 模板、模板继承、Sandbox 与关注点分离、Composer 安装实践；Blade 模板引擎基础、布局继承；Laravel 简介。左侧为课件英文原文，右侧为对应的中文翻译，代码块均可一键复制。</p>
+    <div class="legend">
+      <span><i class="dot en"></i>左栏：English 原文</span>
+      <span><i class="dot zh"></i>右栏：中文翻译</span>
+      <span>⌨ 代码块右上角「复制」按钮可复制代码</span>
+    </div>
+  </div>
+</header>
+
+<nav class="toc">
+  <div class="wrap">
+    <a href="#s1">Twig Include</a>
+    <a href="#s2">继承 · Base</a>
+    <a href="#s3">继承 · Child</a>
+    <a href="#s4">Sandbox 与分离</a>
+    <a href="#s5">使用 Twig</a>
+    <a href="#s6">Application 类</a>
+    <a href="#s7">动手练习</a>
+    <a href="#s8">Twig vs Blade</a>
+    <a href="#s9">Blade 基础</a>
+    <a href="#s10">Blade 布局继承</a>
+    <a href="#s11">Laravel</a>
+    <a href="#s12">资源</a>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <!-- ========== 1. Twig: Include Template ========== -->
+  <section class="lesson" id="s1">
+    <h2><span class="num">1</span>Twig: Include Template <small>· 包含模板</small></h2>
+    <div class="cols">
+      <div class="col en" lang="en">
+        <div class="lang-tag">English · 原文</div>
+        <ul>
+          <li>You can include other templates to reduce duplicated content.</li>
+        </ul>
+        <p>The shared header (logo, menu, site intro) is saved once in <code>_header.html.twig</code>, then every page simply includes it with <code>{{ include('_header.html.twig') }}</code>.</p>
+      </div>
+      <div class="col zh">
+        <div class="lang-tag">中文 · 翻译</div>
+        <ul>
+          <li>你可以包含（include）其他模板，从而减少重复内容。</li>
+        </ul>
+        <p>把各页面共用的页头（logo、菜单、站点介绍）只写一次，保存在 <code>_header.html.twig</code> 中，之后每个页面用 <code>{{ include('_header.html.twig') }}</code> 引入即可。</p>
+      </div>
+    </div>
+
+    <div class="code-card">
+      <div class="code-head">
+        <span class="file"><span class="lang-chip">twig</span><b>templates/_header.html.twig</b></span>
+        <span class="code-actions"><button class="copy-btn" type="button">复制代码</button></span>
+      </div>
+      <pre><code>{# 各页面共用的页头片段 #}
+&lt;header&gt;
+    &lt;img src="/images/logo.png" alt="logo" width="200px"&gt;
+    &lt;ul&gt;
+        &lt;li&gt;&lt;a href="/"&gt;Home&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href="/?action=contact"&gt;Contact Us&lt;/a&gt;&lt;/li&gt;
+    &lt;/ul&gt;
+&lt;/header&gt;
+
+&lt;blockquote&gt;
+    &lt;p&gt;
+        &lt;b&gt;MGW.&lt;/b&gt;
+        &lt;br&gt;You know it makes sense!
+    &lt;/p&gt;
+    &lt;p&gt;
+        Welcome to My Great Website (MGW).
+    &lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h1&gt;{{ pageTitle }}&lt;/h1&gt;</code></pre>
+    </div>
+
+    <div class="code-card">
+      <div class="code-head">
+        <span class="file"><span class="lang-chip">twig</span><b>templates/contact.html.twig（使用 include）</b></span>
+        <span class="code-actions"><button class="copy-btn" type="button">复制代码</button></span>
+      </div>
+      <pre><code>{# 用 include 引入页头，避免重复代码 #}
+&lt;!doctype html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+    &lt;title&gt;MGW: {{ pageTitle }}&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    {{ include('_header.html.twig') }}
+
+    &lt;p&gt;
+        Contact us as follows:
+    &lt;/p&gt;
+    &lt;dl&gt;
+        &lt;dt&gt;Email&lt;/dt&gt;
+        &lt;dd&gt;inquiries@securitydemo.com&lt;/dd&gt;
+
+        &lt;dt&gt;Phone&lt;/dt&gt;
+        &lt;dd&gt;+123 22-333-4444&lt;/dd&gt;
+
+        &lt;dt&gt;Address&lt;/dt&gt;
+        &lt;dd&gt;1 Main Street,&lt;br&gt;Newtown,&lt;br&gt;Ireland&lt;/dd&gt;
+    &lt;/dl&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+    </div>
+  </section>
+
+  <!-- ========== 2. Twig: Template inheritance -- base ========== -->
+  <section class="lesson" id="s2">
+    <h2><span class="num">2</span>Twig: Template Inheritance — Base <small>· 模板继承：基础模板</small></h2>
+    <div class="cols">
+      <div class="col en" lang="en">
+        <div class="lang-tag">English · 原文</div>
+        <ul>
+          <li>Template inheritance involves creating a base template with all the content shared by a group of web pages, then creating individual child templates that extend the base template.</li>
+          <li>The Twig base template is a complete HTML page in its own right, although it may have default or empty blocks meant to be overridden in the child templates.</li>
+        </ul>
+      </div>
+      <div class="col zh">
+        <div class="lang-tag">中文 · 翻译</div>
+        <ul>
+          <li>模板继承是指：先创建一个基础模板（base），包含一组网页所共享的全部内容；然后再创建各个子模板（child），去扩展（extend）这个基础模板。</li>
+          <li>Twig 的基础模板本身就是一个完整的 HTML 页面，只是其中可能带有一些「默认内容」或「空白的 block（块）」，这些块留给子模板去覆盖。</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="code-card">
+      <div class="code-head">
+        <span class="file"><span class="lang-chip">twig</span><b>templates/base.html.twig（基础模板）</b></span>
+        <span class="code-actions"><button class="copy-btn" type="button">复制代码</button></span>
+      </div>
+      <pre><code>{# 基础模板：完整 HTML 页面 + 留给子模板覆盖的 block #}
+&lt;!doctype html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+    &lt;title&gt;MGW: {{ pageTitle }}&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;header&gt;
+        &lt;img src="/images/logo.png" alt="logo" width="200px"&gt;
+        &lt;ul&gt;
+            &lt;li&gt;&lt;a href="/"&gt;Home&lt;/a&gt;&lt;/li&gt;
+            &lt;li&gt;&lt;a href="/?action=contact"&gt;Contact Us&lt;/a&gt;&lt;/li&gt;
+        &lt;/ul&gt;
+    &lt;/header&gt;
+
+    &lt;blockquote&gt;
+        &lt;p&gt;
+            &lt;b&gt;MGW.&lt;/b&gt;
+            &lt;br&gt;You know it makes sense!
+        &lt;/p&gt;
+        &lt;p&gt;
+            Welcome to My Great Website (MGW).
+        &lt;/p&gt;
+    &lt;/blockquote&gt;
+
+    &lt;h1&gt;{{ pageTitle }}&lt;/h1&gt;
+
+    {# 空的 main 块：由子模板填充 #}
+    {% block main %}
+    {% endblock %}
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+    </div>
+  </section>
+
+  <!-- ========== 3. Twig: Template inheritance -- child ========== -->
+  <section class="lesson" id="s3">
+    <h2><span class="num">3</span>Twig: Template Inheritance — Child <small>· 模板继承：子模板</small></h2>
+    <div class="cols">
+      <div class="col en" lang="en">
+        <div class="lang-tag">English · 原文</div>
+        <ul>
+          <li>The child template will fill in or override the base template with their unique content.</li>
+        </ul>
+        <p>The child starts with <code>{% extends 'base.html.twig' %}</code> and only writes the blocks it wants to change — everything else is inherited from the base.</p>
+      </div>
+      <div class="col zh">
+        <div class="lang-tag">中文 · 翻译</div>
+        <ul>
+          <li>子模板会用自己的独有内容去「填充」或「覆盖」基础模板中对应的块。</li>
+        </ul>
+        <p>子模板以 <code>{% extends 'base.html.twig' %}</code> 开头，只需写出自己要修改的 block，其余内容全部继承自基础模板。</p>
+      </div>
+    </div>
+
+    <div class="code-card">
+      <div class="code-head">
+        <span class="file"><span class="lang-chip">twig</span><b>templates/contact.html.twig（使用 extends）</b></span>
+        <span class="code-actions"><button class="copy-btn" type="button">复制代码</button></span>
+      </div>
+      <pre><code>{# 子模板：扩展基础模板，只写自己独有的内容 #}
+{% extends 'base.html.twig' %}
+
+{% block main %}
+    &lt;p&gt;
+        Contact us as follows:
+    &lt;/p&gt;
+    &lt;dl&gt;
+        &lt;dt&gt;Email&lt;/dt&gt;
+        &lt;dd&gt;inquiries@securitydemo.com&lt;/dd&gt;
+
+        &lt;dt&gt;Phone&lt;/dt&gt;
+        &lt;dd&gt;+123 22-333-4444&lt;/dd&gt;
+
+        &lt;dt&gt;Address&lt;/dt&gt;
+        &lt;dd&gt;1 Main Street,&lt;br&gt;Newtown,&lt;br&gt;Ireland&lt;/dd&gt;
+    &lt;/dl&gt;
+{% endblock %}</code></pre>
+    </div>
+  </section>
+
+  <!-- ========== 4. Twig: Sandbox and Separation of Concern ========== -->
+  <section class="lesson" id="s4">
+    <h2><span class="num">4</span>Twig: Sandbox 与关注点分离 <small>· Sandbox and Separation of Concern</small></h2>
+    <div class="cols">
+      <div class="col en" lang="en">
+        <div class="lang-tag">English · 原文</div>
+        <ul>
+          <li>In Twig, all functions and filters calls are restricted by the functions you explicitly enable (besides the built-in functions).</li>
+          <li>The template designer cannot easily take shortcuts, e.g., calling a query in your templates. The query result needs to be passed to the view.</li>
+          <li>It may lead to more work to just call a simple function/filter sometimes.</li>
+          <li>Separation of concern between the model and the view.</li>
+          <li>Twig also includes a Sandbox mode, which can create a safe context, e.g., to let users edit their templates, with limited access to functions/variables. These templates can also be retrieved from a database.</li>
+        </ul>
+      </div>
+      <div class="col zh">
+        <div class="lang-tag">中文 · 翻译</div>
+        <ul>
+          <li>在 Twig 中，所有函数和过滤器的调用都受限于你「显式启用」的函数（内置函数除外）。</li>
+          <li>模板设计者不能轻易「走捷径」，例如在模板里直接调用数据库查询。查询结果必须先传递给视图。</li>
+          <li>有时，哪怕只是调用一个简单的函数/过滤器，也要多做不少工作。</li>
+          <li>这实现了模型（Model）与视图（View）之间的关注点分离。</li>
+          <li>Twig 还提供沙箱（Sandbox）模式：可以创建一个安全的上下文，例如允许用户编辑自己的模板，但只赋予其受限的函数/变量访问权限。这类模板也可以存放在数据库中、需要时再取出。</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== 5. Using Twig ========== -->
+  <section class="lesson" id="s5">
+    <h2><span class="num">5</span>Using Twig <small>· 使用 Twig：Environment 与 render()</small></h2>
+    <div class="cols">
+      <div class="col en" lang="en">
+        <div class="lang-tag">English · 原文</div>
+        <ul>
+          <li>We need to tell Composer that we require the twig package.</li>
+          <li>Our code will need the <code>Twig\Environment</code> class, especially its <code>render()</code> method, which requires us to specify the template file name — usually <code>&lt;pageName&gt;.html.twig</code> by convention — and arguments: an array variable containing the data used to customize the template.</li>
+        </ul>
+      </div>
+      <div class="col zh">
+        <div class="lang-tag">中文 · 翻译</div>
+        <ul>
+          <li>我们需要告诉 Composer：项目需要 twig 包。</li>
+          <li>代码中需要用到 <code>Twig\Environment</code> 类，尤其是它的 <code>render()</code> 方法。调用 <code>render()</code> 时需要指定：模板文件名（按惯例通常命名为 <code>&lt;pageName&gt;.html.twig</code>），以及参数（arguments）—— 一个数组变量，其中存放用于定制模板的数据。</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="code-card">
+      <div class="code-head">
+        <span class="file"><span class="lang-chip">php</span><b>render() 的典型用法</b></span>
+        <span class="code-actions"><button class="copy-btn" type="button">复制代码</button></span>
+      </div>
+      <pre><code>&lt;?php
+// 1. 模板文件名（按惯例通常为 &lt;pageName&gt;.html.twig）
+$template = 'path/templateName.html.twig';
+
+// 2. 参数：一个数组，键 = Twig 模板中使用的变量名，值 = PHP 变量
+$args = [
+    'variable1NameForTwig' =&gt; $phpVariable1,
+    'variable2NameForTwig' =&gt; $phpVariable2,
+];
+
+// 3. 渲染模板得到 HTML，并输出到页面
+$html = $this-&gt;twig-&gt;render($template, $args);
+print $html;</code></pre>
+    </div>
+  </section>
+
+  <!-- ========== 6. Twig: Application class ========== -->
+  <section class="lesson" id="s6">
+    <h2><span class="num">6</span>Twig: Application 类 <small>· Application Class 与入口文件</small></h2>
+    <div class="cols">
+      <div class="col en" lang="en">
+        <div class="lang-tag">English · 原文</div>
+        <ul>
+          <li>An <code>Application</code> class is created to initialize the Twig environment and provide the <code>run()</code> method to render the page.</li>
+          <li>The index file only requires the Composer autoloader, then creates an <code>Application</code> and calls <code>run()</code>.</li>
+        </ul>
+      </div>
+      <div class="col zh">
+        <div class="lang-tag">中文 · 翻译</div>
+        <ul>
+          <li>我们创建一个 <code>Application</code> 类，用于初始化 Twig 环境，并提供 <code>run()</code> 方法来渲染页面。</li>
+          <li>入口文件 index.php 只需加载 Composer 自动加载器，然后实例化 <code>Application</code> 并调用 <code>run()</code>。</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="code-card">
+      <div class="code-head">
+        <span class="file"><span class="lang-chip">php</span><b>src/Application.php</b></span>
+        <span class="code-actions"><button class="copy-btn" type="button">复制代码</button></span>
+      </div>
+      <pre><code>&lt;?php
+namespace Mattsmithdev;
+
+use Twig\Loader\FilesystemLoader;
+use Twig\Environment;
+
+class Application
+{
+    const PATH_TO_TEMPLATES = __DIR__ . '/../templates';
+
+    private Environment $twig;
+
+    public function __construct()
+    {
+        // 初始化 Twig：指定模板所在的目录
+        $loader = new FilesystemLoader(self::PATH_TO_TEMPLATES);
+        $this-&gt;twig = new Environment($loader);
+    }
+
+    public function run()
+    {
+        $meals = [
+            'breakfast' =&gt; 'toast',
+            'lunch'     =&gt; 'salad',
+            'dinner'    =&gt; 'fish and chips',
+        ];
+
+        $product1 = new Product();
+        $product1-&gt;setDescription('bag of nails');
+        $product1-&gt;setPrice(18.99);
+
+        $template = 'demo.html.twig';
+        $args = [
+            'name'    =&gt; 'matt',
+            'meals'   =&gt; $meals,
+            'product' =&gt; $product1,
+        ];
+
+        $html = $this-&gt;twig-&gt;render($template, $args);
+        print $html;
+    }
+}</code></pre>
+    </div>
+
+    <div class="code-card">
+      <div class="code-head">
+        <span class="file"><span class="lang-chip">php</span><b>public/index.php（入口）</b></span>
+        <span class="code-actions"><button class="copy-btn" type="button">复制代码</button></span>
+      </div>
+      <pre><code>&lt;?php
+require_once __DIR__ . '/../vendor/autoload.php';
+
+use Mattsmithdev\Application;
+
+$app = new Application();
+$app-&gt;run();</code></pre>
+    </div>
+
+    <div class="code-card">
+      <div class="code-head">
+        <span class="file"><span class="lang-chip">twig</span><b>templates/demo.html.twig</b></span>
+        <span class="code-actions"><button class="copy-btn" type="button">复制代码</button></span>
+      </div>
+      <pre><code>&lt;!doctype html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+    &lt;title&gt;Twig examples&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;p&gt;Hello {{ name }}&lt;/p&gt;
+    &lt;hr&gt;
+    &lt;p&gt;for dinner you will have {{ meals.dinner }}&lt;/p&gt;
+    &lt;hr&gt;
+    &lt;p&gt;the price of {{ product.getDescription() }} is ${{ product.price }}&lt;/p&gt;
+    &lt;hr&gt;
+    &lt;p&gt;
+        details about product:
+        {{ dump(product) }}
+    &lt;/p&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+    </div>
+  </section>
+
+  <!-- ========== 7. Twig: Practice ========== -->
+  <section class="lesson" id="s7">
+    <h2><span class="num">7</span>Twig: Practice <small>· 动手练习步骤</small></h2>
+    <div class="cols">
+      <div class="col en" lang="en">
+        <div class="lang-tag">English · 原文</div>
+        <ol>
+          <li>Add Twig to the project:<br><code>composer require twig/twig</code></li>
+          <li>Create the autoloader (add PSR-4 mapping in <code>composer.json</code>).</li>
+          <li>Dump/create the autoloader script and update the vendor folder:<br><code>composer dump-autoload</code></li>
+          <li>Work on the templates, Application class, other classes and the index.</li>
+        </ol>
+      </div>
+      <div class="col zh">
+        <div class="lang-tag">中文 · 翻译</div>
+        <ol>
+          <li>把 Twig 加入项目：<br><code>composer require twig/twig</code></li>
+          <li>创建自动加载器（在 <code>composer.json</code> 中配置 PSR-4 映射）。</li>
+          <li>生成/更新自动加载脚本并更新 vendor 文件夹：<br><code>composer dump-autoload</code></li>
+          <li>编写模板、Application 类、其他类以及入口 index 文件。</li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="code-card">
+      <div class="code-head">
+        <span class="file"><span class="lang-chip">shell</span><b>Terminal 命令</b></span>
+        <span class="code-actions"><button class="copy-btn" type="button">复制代码</button></span>
+      </div>
+      <pre><code># 1. 把 Twig 加入项目依赖
+composer require twig/twig
+
+# 2. 生成/更新 autoloader 脚本，并更新 vendor 文件夹
+composer dump-autoload</code></pre>
+    </div>
+
+    <div class="code-card">
+      <div class="code-head">
+        <span class="file"><span class="lang-chip">json</span><b>composer.json</b></span>
+        <span class="code-actions"><button class="copy-btn" type="button">复制代码</button></span>
+      </div>
+      <pre><code>{
+    "autoload": {
+        "psr-4": {
+            "Mattsmithdev\\": "src"
+        }
+    },
+    "require": {
+        "twig/twig": "^3.10"
+    }
+}</code></pre>
+    </div>
+  </section>
+
+  <!-- ========== 8. Twig vs Blade ========== -->
+  <section class="lesson" id="s8">
+    <h2><span class="num">8</span>Twig vs Blade <small>· 两种模板引擎对比</small></h2>
+    <div class="cols">
+      <div class="col en" lang="en">
+        <div class="lang-tag">English · 原文</div>
+        <ul>
+          <li>Blade is another template engine that offers slightly faster performance, less functionality, but simpler syntax that is great for rapid development.</li>
+          <li>Unlike Twig — which is part of the Symfony framework and quite flexible to be used in other frameworks (except Laravel) and larger projects — Blade is used only in Laravel.</li>
+          <li>Blade templates allow PHP code to be written within the template.</li>
+          <li>Less strict on separation of concern.</li>
+          <li>Less secure than Twig.</li>
+        </ul>
+      </div>
+      <div class="col zh">
+        <div class="lang-tag">中文 · 翻译</div>
+        <ul>
+          <li>Blade 是另一个模板引擎：性能略快、功能较少，但语法更简单，非常适合快速开发。</li>
+          <li>Twig 是 Symfony 框架的一部分，非常灵活，可用于其他框架（Laravel 除外）和大型项目；而 Blade 只用于 Laravel。</li>
+          <li>Blade 模板允许在模板中直接编写 PHP 代码。</li>
+          <li>对关注点分离（separation of concern）的要求较宽松。</li>
+          <li>安全性不如 Twig。</li>
+        </ul>
+      </div>
+    </div>
+
+    <table class="cmp">
+      <thead>
+        <tr><th>对比维度</th><th>Twig</th><th>Blade</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>性能</td><td>稍慢</td><td>略快（slightly faster）</td></tr>
+        <tr><td>功能</td><td>更丰富（过滤器、沙箱等）</td><td>较少</td></tr>
+        <tr><td>语法</td><td>较严格</td><td>更简单，适合快速开发</td></tr>
+        <tr><td>框架支持</td><td>Symfony 的一部分；可用于其他框架（除 Laravel）及大型项目</td><td>仅用于 Laravel</td></tr>
+        <tr><td>模板中写 PHP</td><td>不允许</td><td>允许</td></tr>
+        <tr><td>关注点分离</td><td>更严格</td><td>较宽松</td></tr>
+        <tr><td>安全性</td><td>更安全（自动转义、Sandbox）</td><td>相对较弱</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ========== 9. Blade template engines (basics) ========== -->
+  <section class="lesson" id="s9">
+    <h2><span class="num">9</span>Blade 模板引擎：基础语法 <small>· Blade Basics</small></h2>
+    <div class="cols">
+      <div class="col en" lang="en">
+        <div class="lang-tag">English · 原文</div>
+        <ul>
+          <li>Blade supports template inheritance and control structures that are simpler to write. It has <code>@section</code> that is similar to <code>block</code> in Twig.</li>
+          <li>Blade can display variables in escaped content <code>{{ $var }}</code> or raw without filter <code>{!! $var !!}</code>.</li>
+          <li>Accessing an object's member in Blade is similar to PHP (e.g. <code>$user-&gt;name</code>).</li>
+        </ul>
+      </div>
+      <div class="col zh">
+        <div class="lang-tag">中文 · 翻译</div>
+        <ul>
+          <li>Blade 支持模板继承和控制结构，写法更简单。它的 <code>@section</code> 类似于 Twig 中的 <code>block</code>。</li>
+          <li>Blade 既可以用转义方式输出变量 <code>{{ $var }}</code>，也可以用不做过滤的原样输出 <code>{!! $var !!}</code>。</li>
+          <li>在 Blade 中访问对象成员的方式与 PHP 类似（如 <code>$user-&gt;name</code>）。</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="code-card">
+      <div class="code-head">
+        <span class="file"><span class="lang-chip">blade</span><b>继承 + 循环控制结构</b></span>
+        <span class="code-actions"><button class="copy-btn" type="button">复制代码</button></span>
+      </div>
+      <pre><code>@extends('layouts.master')
+
+@section('content')
+    @foreach ($users as $user)
+        &lt;p&gt;This is user {{ $user-&gt;name }}&lt;/p&gt;
+    @endforeach
+@endsection</code></pre>
+    </div>
+
+    <div class="code-card">
+      <div class="code-head">
+        <span class="file"><span class="lang-chip">blade</span><b>条件判断与两种输出方式</b></span>
+        <span class="code-actions"><button class="copy-btn" type="button">复制代码</button></span>
+      </div>
+      <pre><code>@if ($user)
+    &lt;p&gt;Welcome, {{ $user-&gt;name }}&lt;/p&gt;
+@else
+    &lt;p&gt;Welcome, Guest&lt;/p&gt;
+@endif
+
+{{-- 转义输出（推荐） --}}
+{{ $var }}
+
+{{-- 原样输出，不经过转义过滤（谨慎使用） --}}
+{!! $var !!}</code></pre>
+    </div>
+  </section>
+
+  <!-- ========== 10. Blade naming & layout inheritance ========== -->
+  <section class="lesson" id="s10">
+    <h2><span class="num">10</span>Blade 模板引擎：命名与布局继承 <small>· File Naming &amp; Master Layout</small></h2>
+    <div class="cols">
+      <div class="col en" lang="en">
+        <div class="lang-tag">English · 原文</div>
+        <ul>
+          <li>The Blade file is named as <code>filename.blade.php</code> by convention.</li>
+          <li>The master Blade (similar to the base template of Twig) is usually placed in the main <code>layouts</code> folder.</li>
+          <li>The child template extends the master layout by specifying the combination of folder structure and template filename. For example, extend:
+            <ul>
+              <li><code>layouts.master</code> for <code>layouts/master.blade.php</code></li>
+              <li><code>layouts.main.home</code> for <code>layouts/main/home.blade.php</code></li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+      <div class="col zh">
+        <div class="lang-tag">中文 · 翻译</div>
+        <ul>
+          <li>按照惯例，Blade 文件命名为 <code>文件名.blade.php</code>。</li>
+          <li>主模板（master，类似 Twig 的基础模板）通常放在主 <code>layouts</code> 文件夹中。</li>
+          <li>子模板通过「文件夹结构 + 模板文件名」的点号组合来扩展主布局。例如：
+            <ul>
+              <li><code>layouts.master</code> 对应 <code>layouts/master.blade.php</code></li>
+              <li><code>layouts.main.home</code> 对应 <code>layouts/main/home.blade.php</code></li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="code-card">
+      <div class="code-head">
+        <span class="file"><span class="lang-chip">blade</span><b>layouts/master.blade.php（主布局）</b></span>
+        <span class="code-actions"><button class="copy-btn" type="button">复制代码</button></span>
+      </div>
+      <pre><code>&lt;!-- layouts/master.blade.php --&gt;
+&lt;html&gt;
+    &lt;head&gt;
+        &lt;title&gt;App Name - @yield('title')&lt;/title&gt;
+    &lt;/head&gt;
+    &lt;body&gt;
+        @section('sidebar')
+            This is the master sidebar.
+        @show
+
+        &lt;div class="container"&gt;
+            @yield('content')
+        &lt;/div&gt;
+    &lt;/body&gt;
+&lt;/html&gt;</code></pre>
+    </div>
+
+    <div class="code-card">
+      <div class="code-head">
+        <span class="file"><span class="lang-chip">blade</span><b>child.blade.php（子模板）</b></span>
+        <span class="code-actions"><button class="copy-btn" type="button">复制代码</button></span>
+      </div>
+      <pre><code>&lt;!-- child.blade.php --&gt;
+@extends('layouts.master')
+
+@section('title', 'Page Title')
+
+@section('sidebar')
+    @parent
+
+    &lt;p&gt;This is appended to the master sidebar.&lt;/p&gt;
+@endsection
+
+@section('content')
+    &lt;p&gt;This is my body content.&lt;/p&gt;
+@endsection</code></pre>
+    </div>
+  </section>
+
+  <!-- ========== 11. Laravel ========== -->
+  <section class="lesson" id="s11">
+    <h2><span class="num">11</span>Laravel 框架 <small>· Laravel Frameworks</small></h2>
+    <div class="cols">
+      <div class="col en" lang="en">
+        <div class="lang-tag">English · 原文</div>
+        <ul>
+          <li>Laravel provides various libraries and helper functions to speed up development.</li>
+          <li>Laravel is a framework that aims at creativity — it uses the word <code>artisan</code>.</li>
+          <li>Laravel utilizes the Blade template engine for rapid development.</li>
+          <li>We will learn how to create Laravel projects in the next few weeks.</li>
+        </ul>
+      </div>
+      <div class="col zh">
+        <div class="lang-tag">中文 · 翻译</div>
+        <ul>
+          <li>Laravel 提供各种类库和辅助函数（helper functions）来加速开发。</li>
+          <li>Laravel 是一个以「创造力」为目标的框架——因此它使用了 <code>artisan（工匠）</code> 这个词。</li>
+          <li>Laravel 使用 Blade 模板引擎实现快速开发。</li>
+          <li>我们将在接下来的几周学习如何创建 Laravel 项目。</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== 12. Resources ========== -->
+  <section class="lesson" id="s12">
+    <h2><span class="num">12</span>Resources <small>· 参考资料</small></h2>
+    <div class="cols">
+      <div class="col en" lang="en">
+        <div class="lang-tag">English · 原文</div>
+        <ul class="resources">
+          <li><a href="https://barryvdh.nl/laravel/twig/2015/08/22/comparing-blade-and-twig-templates-in-laravel/" target="_blank" rel="noopener">Comparing Blade and Twig templates in Laravel — barryvdh.nl</a></li>
+          <li><a href="https://medium.com/@rohitdhiman91/using-blade-templates-in-laravel-a-beginners-guide-8b31ef7b2d6b" target="_blank" rel="noopener">Using Blade Templates in Laravel: A Beginner's Guide — medium.com</a></li>
+        </ul>
+      </div>
+      <div class="col zh">
+        <div class="lang-tag">中文 · 翻译</div>
+        <p>课件中给出的两篇英文参考文章（见左侧链接）；以下为补充的官方文档：</p>
+        <ul class="resources">
+          <li><a href="https://twig.symfony.com/doc/" target="_blank" rel="noopener">Twig 官方文档 — twig.symfony.com</a><span class="extra-tag">补充</span></li>
+          <li><a href="https://laravel.com/docs/blade" target="_blank" rel="noopener">Blade 官方文档 — laravel.com/docs/blade</a><span class="extra-tag">补充</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<footer>
+  本页面根据 CSIS3280 Week 07 课程讲义整理制作 · 左栏英文原文 / 右栏中文翻译 · 代码块仅供课堂学习使用
+</footer>
+
+<script>
+(function () {
+  function bindCopy(btn) {
+    btn.addEventListener('click', function () {
+      var card = btn.closest('.code-card');
+      var code = card ? card.querySelector('pre code') : null;
+      if (!code) return;
+      var text = code.innerText;
+
+      function done() {
+        btn.textContent = '已复制';
+        btn.classList.add('ok');
+        setTimeout(function () {
+          btn.textContent = '复制代码';
+          btn.classList.remove('ok');
+        }, 1600);
+      }
+
+      function fallback() {
+        var ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.focus();
+        ta.select();
+        try {
+          document.execCommand('copy');
+          done();
+        } catch (e) {
+          alert('复制失败，请手动选择代码复制');
+        }
+        document.body.removeChild(ta);
+      }
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(done).catch(fallback);
+      } else {
+        fallback();
+      }
+    });
+  }
+
+  document.querySelectorAll('.copy-btn').forEach(bindCopy);
+})();
+</script>
+
+</body>
+</html>

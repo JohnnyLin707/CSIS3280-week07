@@ -1,0 +1,10 @@
+# Course materials marked NOT FOR DISTRIBUTION
+CSIS 3280 Lecture07.pdf
+
+# Starter code and archives (provided course material)
+3280week07_starter/
+*.zip
+
+# OS / editor junk
+.DS_Store
+Thumbs.db
