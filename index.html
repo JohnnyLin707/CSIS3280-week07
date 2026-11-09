@@ -27,11 +27,17 @@
   .legend span{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.28);padding:4px 13px;border-radius:999px;font-size:13px}
   .dot{width:10px;height:10px;border-radius:50%;display:inline-block}
   .dot.en{background:#c7d2fe}.dot.zh{background:#6ee7b7}
+  .quiz-cta{display:inline-flex;align-items:center;gap:10px;margin-top:20px;background:#fff;color:#3730a3;
+    font-weight:800;font-size:15px;text-decoration:none;padding:10px 20px;border-radius:10px;box-shadow:0 4px 14px rgba(0,0,0,.18)}
+  .quiz-cta:hover{background:#eef2ff}
+  .quiz-cta span{font-size:18px}
 
   nav.toc{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.94);backdrop-filter:blur(8px);border-bottom:1px solid var(--border);padding:10px 24px}
   nav.toc .wrap{max-width:1180px;margin:0 auto;display:flex;gap:8px;flex-wrap:wrap}
   nav.toc a{font-size:13px;color:#334155;text-decoration:none;padding:3px 11px;border-radius:999px;border:1px solid var(--border);background:#fff;white-space:nowrap}
   nav.toc a:hover{border-color:var(--brand);color:var(--brand)}
+  nav.toc a.nav-quiz{background:var(--brand);border-color:var(--brand);color:#fff;font-weight:700}
+  nav.toc a.nav-quiz:hover{background:#3730a3;color:#fff}
 
   .wrap{max-width:1180px;margin:0 auto;padding:6px 24px 90px}
 
@@ -105,12 +111,13 @@
   <div class="wrap">
     <div class="kicker">CSIS 3280 · Week 07 · Web Development</div>
     <h1>Twig 与 Blade 模板引擎 — 英中对照教程</h1>
-    <p>Twig: Include 模板、模板继承、Sandbox 与关注点分离；环境准备（Windows cmd / macOS Terminal 的 cd、Composer 安装与运行、安装排错）；Blade 模板引擎基础、布局继承；Laravel 简介。左侧为课件英文原文，右侧为对应的中文翻译，代码块均可一键复制。</p>
+    <p>Twig: Include 模板、模板继承、Sandbox 与关注点分离；环境准备（Windows cmd / macOS Terminal 的 cd、Composer 安装与运行、安装排错）；Blade 模板引擎基础、布局继承；Laravel 简介。左侧为课件英文原文，右侧为对应的中文翻译，代码块均可一键复制；学完可点击 Quiz-2 按钮进入 5 套编程测验。</p>
     <div class="legend">
       <span><i class="dot en"></i>左栏：English 原文</span>
       <span><i class="dot zh"></i>右栏：中文翻译</span>
       <span>⌨ 代码块右上角「复制」按钮可复制代码</span>
     </div>
+    <a class="quiz-cta" href="quiz2.html">Quiz-2 编程考试 <span>→</span></a>
   </div>
 </header>
 
@@ -130,6 +137,7 @@
     <a href="#s12">Blade 布局继承</a>
     <a href="#s13">Laravel</a>
     <a href="#s14">资源</a>
+    <a class="nav-quiz" href="quiz2.html">Quiz-2 编程考试 →</a>
   </div>
 </nav>
 

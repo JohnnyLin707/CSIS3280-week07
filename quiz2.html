@@ -1,0 +1,993 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quiz-2 · 编程考试 | CSIS3280 Week 07</title>
+<style>
+  :root{
+    --bg:#f5f6fa; --card:#fff; --ink:#1f2937; --muted:#64748b; --border:#e5e7eb;
+    --brand:#4f46e5; --brand-soft:#eef2ff; --zh:#047857; --zh-soft:#f2fbf6;
+    --code-bg:#0f172a; --code-ink:#e2e8f0;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);line-height:1.65;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif}
+
+  .q-header{background:linear-gradient(135deg,#312e81 0%,#4f46e5 58%,#6366f1 100%);color:#fff;padding:26px 24px 24px}
+  .q-header .wrap{max-width:1400px;margin:0 auto}
+  .back{color:#e0e7ff;font-size:13px;text-decoration:none}
+  .back:hover{text-decoration:underline}
+  .q-header h1{margin:10px 0 4px;font-size:27px}
+  .q-header .sub{margin:0;opacity:.9;font-size:14px}
+  .stat-bar{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+  .stat{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.28);border-radius:10px;padding:6px 14px;font-size:13px;font-weight:700}
+  .stat b{font-size:16px;color:#a7f3d0}
+  .note{margin:14px 0 0;background:rgba(255,255,255,.12);border-left:3px solid #fcd34d;border-radius:6px;padding:9px 14px;font-size:12.5px;max-width:1000px}
+  .note b{color:#fde68a}
+
+  .q-wrap{max-width:1400px;margin:0 auto;padding:20px 24px 90px}
+  .tabs{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:18px}
+  .tab{display:flex;align-items:center;gap:9px;background:#fff;border:1px solid var(--border);border-radius:11px;
+    padding:9px 14px;cursor:pointer;font-family:inherit;font-size:13.5px;color:#334155;transition:.15s}
+  .tab:hover{border-color:var(--brand)}
+  .tab.active{background:var(--brand);border-color:var(--brand);color:#fff;box-shadow:0 3px 10px rgba(79,70,229,.25)}
+  .tab-n{font-weight:800;font-size:13px}
+  .tab-s{font-size:11.5px;font-weight:700;padding:1px 8px;border-radius:999px;background:var(--brand-soft);color:#3730a3}
+  .tab.active .tab-s{background:rgba(255,255,255,.22);color:#fff}
+
+  .quiz-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:stretch}
+  .panel{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:18px;
+    height:78vh;min-height:560px;overflow-y:auto;box-shadow:0 1px 3px rgba(15,23,42,.06)}
+  .panel-title{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 12px;font-size:15px;font-weight:800}
+  .panel-title small{font-weight:600;color:var(--muted);font-size:12.5px}
+  .block-label{font-size:11px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin:14px 0 7px}
+  .en-spec{margin:0;background:var(--code-bg);color:#a5b4fc;padding:14px 16px;border-radius:11px;
+    font-family:var(--mono);font-size:12.5px;line-height:1.65;white-space:pre-wrap;overflow-x:auto}
+  .zh-block{background:var(--zh-soft);border:1px solid #d1fae5;border-radius:11px;padding:12px 15px;
+    font-size:13.5px;white-space:pre-line;color:#065f46}
+  .given-pre{margin:0;background:#f8fafc;border:1px solid var(--border);border-radius:11px;padding:13px 15px;
+    font-family:var(--mono);font-size:12px;line-height:1.6;white-space:pre-wrap;overflow-x:auto;color:#334155}
+
+  .editor-head{display:flex;justify-content:space-between;align-items:center;background:#1e293b;color:#e2e8f0;
+    border-radius:10px 10px 0 0;padding:8px 13px;font-family:var(--mono);font-size:12.5px}
+  .editor-head b{font-weight:600}
+  .lang-chip{font-size:11px;font-weight:700;color:#a5b4fc;border:1px solid #3730a3;background:#1e1b4b;border-radius:999px;padding:1px 9px}
+  #editor{display:block;width:100%;min-height:290px;height:calc(78vh - 300px);resize:vertical;
+    background:var(--code-bg);color:var(--code-ink);border:1px solid #1e293b;border-top:none;border-radius:0 0 10px 10px;
+    padding:14px 16px;font-family:var(--mono);font-size:13px;line-height:1.65;tab-size:4;outline:none}
+  #editor:focus{box-shadow:inset 0 0 0 2px #4f46e5}
+
+  .btn-row{display:flex;gap:9px;flex-wrap:wrap;margin-top:14px}
+  .btn{font-family:inherit;font-size:13.5px;font-weight:700;padding:9px 16px;border-radius:9px;
+    border:1px solid var(--border);background:#fff;color:#334155;cursor:pointer}
+  .btn:hover{border-color:var(--brand);color:var(--brand)}
+  .btn.primary{background:var(--brand);border-color:var(--brand);color:#fff}
+  .btn.primary:hover{background:#4338ca;color:#fff}
+  .btn.ghost{color:var(--muted)}
+  .btn.amber{background:#fffbeb;border-color:#fcd34d;color:#92400e}
+  .btn.amber:hover{background:#fef3c7;color:#92400e}
+
+  .result{margin-top:14px;border:1px solid var(--border);border-radius:11px;padding:14px 16px;background:#fafbff}
+  .result-head{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+  .score{font-size:30px;font-weight:900;color:var(--brand);line-height:1}
+  .score span{font-size:14px;color:var(--muted);font-weight:600}
+  .score-tag{font-size:13px;font-weight:700;padding:3px 11px;border-radius:999px;background:var(--brand-soft);color:#3730a3}
+  .bar{height:9px;border-radius:999px;background:#e5e7eb;overflow:hidden;margin:11px 0 13px}
+  .bar i{display:block;height:100%;background:linear-gradient(90deg,#6366f1,#10b981);border-radius:999px;transition:width .4s}
+  .check-list{list-style:none;margin:0;padding:0;font-size:13px}
+  .check-list li{padding:6px 0;border-top:1px dashed var(--border)}
+  .check-list li:first-child{border-top:none}
+  .ok{color:#047857;font-weight:800}
+  .no{color:#b91c1c;font-weight:800}
+  .ck-label{font-weight:600}
+  .ck-hint{display:block;color:var(--muted);font-size:12.5px;margin-left:22px}
+
+  .answer-box{margin-top:14px;border-radius:11px;overflow:hidden;border:1px solid #1e293b}
+  .answer-head{background:#1e293b;color:#fde68a;padding:8px 14px;font-size:12.5px;font-family:var(--mono)}
+  .answer-box pre{margin:0;background:var(--code-bg);color:var(--code-ink);padding:14px 16px;overflow-x:auto;
+    font-family:var(--mono);font-size:12.5px;line-height:1.6}
+
+  .term-section,.final-section{margin-top:22px;background:var(--card);border:1px solid var(--border);
+    border-radius:16px;padding:20px;box-shadow:0 1px 3px rgba(15,23,42,.06)}
+  .term-section h2,.final-section h2{margin:0 0 4px;font-size:18px}
+  .term-section p,.final-section p{margin:0 0 14px;color:var(--muted);font-size:13px}
+  .terminal{background:#080f1d;border:1px solid #1e293b;border-radius:11px;overflow:hidden}
+  .term-bar{display:flex;align-items:center;gap:6px;background:#1e293b;padding:8px 12px}
+  .term-bar i{width:10px;height:10px;border-radius:50%;display:inline-block}
+  .term-bar i:nth-child(1){background:#ff5f56}.term-bar i:nth-child(2){background:#ffbd2e}.term-bar i:nth-child(3){background:#27c93f}
+  .term-bar span{margin-left:8px;color:#94a3b8;font-family:var(--mono);font-size:11.5px}
+  .term-body{font-family:var(--mono);font-size:12.5px;line-height:1.65;padding:13px 15px;min-height:150px;
+    max-height:340px;overflow-y:auto;white-space:pre-wrap;word-break:break-word}
+  .term-line{min-height:1.65em}
+  .term-line.cmd{color:#a5b4fc;font-weight:700}
+  .term-line.out{color:#cbd5e1}
+  .term-line.ok{color:#6ee7b7}
+  .term-line.warn{color:#fcd34d}
+  .term-line.html{color:#93c5fd}
+  .term-body.typing .term-line:last-child::after{content:'▌';color:#6ee7b7;animation:blink .8s step-end infinite}
+  @keyframes blink{50%{opacity:0}}
+  .term-idle{color:#64748b}
+
+  .preview{margin-top:16px;border:1px solid var(--border);border-radius:11px;overflow:hidden;background:#fff}
+  .preview-bar{background:#f1f5f9;border-bottom:1px solid var(--border);padding:7px 13px;font-family:var(--mono);font-size:12px;color:#475569}
+  .preview-body{padding:18px 22px;font-size:14px}
+  .preview-body .p-nav{list-style:none;display:flex;gap:16px;padding:0;margin:8px 0}
+  .preview-body .p-nav a{color:#1d4ed8}
+  .preview-body blockquote{margin:14px 0;padding:10px 14px;background:#f8fafc;border-left:4px solid #4f46e5}
+  .preview-body dl{margin:10px 0}
+  .preview-body dt{font-weight:800;margin-top:6px}
+  .preview-body dd{margin:0 0 4px 0}
+  .hidden{display:none}
+
+  footer{border-top:1px solid var(--border);margin-top:30px;padding:24px;color:var(--muted);font-size:12.5px;text-align:center}
+  @media (max-width:900px){
+    .quiz-grid{grid-template-columns:1fr}
+    .panel{height:auto;min-height:0}
+    #editor{height:300px}
+  }
+</style>
+</head>
+<body>
+
+<header class="q-header">
+  <div class="wrap">
+    <a class="back" href="index.html">← 返回教程首页</a>
+    <h1>Quiz-2 · 纯编程考试</h1>
+    <p class="sub">CSIS 3280 Week 07 · Twig / Blade / Composer · 5 套题目 · 完成度评分</p>
+    <div class="stat-bar">
+      <div class="stat">已完成 <b id="statDone">0 / 5</b></div>
+      <div class="stat">总分 <b id="statTotal">0 / 500</b></div>
+      <div class="stat">平均 <b id="statAvg">0</b> 分</div>
+    </div>
+    <p class="note"><b>说明：</b>本页是静态网页，浏览器无法真正执行 PHP / Twig / Blade。「检查代码」采用<b>结构化语法匹配</b>，按检查点完成度给分；「模拟终端」显示的是<b>预期运行结果的演示</b>，不是真实执行。请把代码复制到本机项目里用 <code>php</code> / Composer 真正运行验证。</p>
+  </div>
+</header>
+
+<div class="q-wrap">
+
+  <div class="tabs" id="tabs"></div>
+
+  <div class="quiz-grid">
+    <section class="panel">
+      <h2 class="panel-title" id="qTitle">题目 <small>Question</small></h2>
+      <div class="block-label">English · 题目（英文注释）</div>
+      <pre class="en-spec" id="enSpec"></pre>
+      <div class="block-label">中文翻译 · 中文说明</div>
+      <div class="zh-block" id="zhSpec"></div>
+      <div class="block-label">已提供文件 / 参考资料（Given）</div>
+      <pre class="given-pre" id="given"></pre>
+    </section>
+
+    <section class="panel">
+      <h2 class="panel-title">代码输入 <small>Code Editor · 中文注释提示</small></h2>
+      <div class="editor-head"><b id="fileName">—</b><span class="lang-chip" id="langChip">—</span></div>
+      <textarea id="editor" spellcheck="false" autocomplete="off" autocapitalize="off"></textarea>
+      <div class="btn-row">
+        <button class="btn primary" id="checkBtn" type="button">✓ 检查代码</button>
+        <button class="btn amber" id="answerBtn" type="button">显示正确答案</button>
+        <button class="btn" id="runBtn" type="button">▶ 运行测试</button>
+        <button class="btn ghost" id="resetBtn" type="button">清空重做</button>
+      </div>
+      <div class="result hidden" id="result"></div>
+      <div class="answer-box hidden" id="answerBox">
+        <div class="answer-head">标准答案 / Model Answer · 点击「显示正确答案」可切换</div>
+        <pre id="answerCode"></pre>
+      </div>
+    </section>
+  </div>
+
+  <section class="term-section">
+    <h2>模拟终端 · 本题运行效果</h2>
+    <p>点击右侧「▶ 运行测试」查看本题代码通过后的预期输出，终端会逐行模拟显示。</p>
+    <div class="terminal">
+      <div class="term-bar"><i></i><i></i><i></i><span>johnnylin@MacBook-Air — quiz2 — zsh</span></div>
+      <div class="term-body" id="termBody"><div class="term-line term-idle">$ 等待运行测试…（请先点击「检查代码」，再点击「运行测试」）</div></div>
+    </div>
+  </section>
+
+  <section class="final-section">
+    <h2>总程序运行效果 / Full Program Output</h2>
+    <p>把 5 套题目串成完整项目：Composer 安装依赖 → 自动加载 → Application 类渲染 Twig 基础模板与子模板 → 浏览器得到最终页面。点击按钮查看模拟终端与最终页面效果。</p>
+    <div class="btn-row" style="margin-top:0">
+      <button class="btn primary" id="fullBtn" type="button">▶ 运行完整程序（模拟）</button>
+      <button class="btn" id="fullResetBtn" type="button">重置终端</button>
+    </div>
+    <div class="terminal" style="margin-top:14px">
+      <div class="term-bar"><i></i><i></i><i></i><span>johnnylin@MacBook-Air — 3280week07_starter — zsh</span></div>
+      <div class="term-body" id="fullTermBody" style="min-height:220px"><div class="term-line term-idle">$ 等待运行完整程序…</div></div>
+    </div>
+    <div class="preview hidden" id="preview">
+      <div class="preview-bar">浏览器预览 · http://localhost:8000/?action=contact</div>
+      <div class="preview-body">
+        <img src="images/logo.png" alt="MGW logo" style="width:120px;height:34px;object-fit:contain;background:#eef2ff;border-radius:4px">
+        <ul class="p-nav"><li><a href="#">Home</a></li><li><a href="#">Contact Us</a></li></ul>
+        <blockquote>
+          <b>MGW.</b><br>You know it makes sense!
+          <p>Welcome to My Great Website (MGW).</p>
+        </blockquote>
+        <h1>Contact Us</h1>
+        <p>Contact us as follows:</p>
+        <dl>
+          <dt>Email</dt><dd>inquiries@securitydemo.com</dd>
+          <dt>Phone</dt><dd>+123 22-333-4444</dd>
+          <dt>Address</dt><dd>1 Main Street,<br>Newtown,<br>Ireland</dd>
+        </dl>
+        <p style="color:#047857;font-weight:700">✓ 最终页面渲染成功：基础模板 + 子模板 + Twig Environment + Composer 自动加载</p>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<footer>CSIS3280 Week 07 · Quiz-2 · 检查方式为语法结构匹配，模拟终端为预期输出演示 · <a href="index.html">返回教程</a></footer>
+
+<script>
+'use strict';
+
+const $ = id => document.getElementById(id);
+const all = (...res) => c => res.every(r => r.test(c));
+
+const QUESTIONS = [
+  {
+    short: 'Include 模板',
+    title: 'Q1 · Twig: Include Template',
+    file: 'templates/contact.html.twig',
+    lang: 'twig',
+    en: String.raw`// ============================================================
+// QUIZ-2  |  Task 1 of 5  |  Twig: Include Template
+// ------------------------------------------------------------
+// Write the file: templates/contact.html.twig
+//
+// GIVEN: templates/_header.html.twig (a shared partial)
+//        with the logo, Home / Contact Us navigation,
+//        the site intro blockquote and <h1>{{ pageTitle }}</h1>.
+//
+// REQUIREMENTS
+//   1. Produce a complete HTML5 page: doctype, html, head, body.
+//   2. Print the "pageTitle" variable inside <title> with Twig.
+//   3. Insert the shared partial with the Twig include() function.
+//   4. Add a <dl> list with Email, Phone and Address, using the
+//      class values: inquiries@securitydemo.com,
+//      +123 22-333-4444, 1 Main Street / Newtown / Ireland.
+//   5. Close every tag properly.
+// ============================================================`,
+    zh: `任务 1 — Twig：包含模板（Include Template）
+请编写 templates/contact.html.twig。
+已提供共用片段 templates/_header.html.twig（见下方 Given），里面是 logo、Home / Contact Us 导航、站点介绍和页面标题，不要在答案里重复写一遍。
+
+要求：
+① 输出完整 HTML5 页面骨架（doctype、html、head、body）。
+② 在 <title> 中用 Twig 输出 pageTitle 变量。
+③ 用 Twig 的 include() 函数引入 _header.html.twig 片段。
+④ 用定义列表 <dl> / <dt> / <dd> 写出 Email、Phone、Address 三项，取值与课件一致。
+⑤ 所有标签正确闭合。
+
+考点：include 减少重复内容；变量输出 {{ ... }}；模板文件命名约定。`,
+    given: String.raw`{# ===== 已提供：templates/_header.html.twig ===== #}
+<header>
+    <img src="/images/logo.png" alt="logo" width="200px">
+    <ul>
+        <li><a href="/">Home</a></li>
+        <li><a href="/?action=contact">Contact Us</a></li>
+    </ul>
+</header>
+<blockquote>
+    <p><b>MGW.</b><br>You know it makes sense!</p>
+    <p>Welcome to My Great Website (MGW).</p>
+</blockquote>
+<h1>{{ pageTitle }}</h1>`,
+    starter: String.raw`{# 中文提示：在下面写 templates/contact.html.twig #}
+{# 提示 1：先写 HTML5 页面骨架（doctype、html、head、body） #}
+{# 提示 2：在 title 标签里用 Twig 输出 pageTitle 变量 #}
+{# 提示 3：用 include() 函数引入左侧 Given 中的共用页头片段 #}
+{# 提示 4：用定义列表写出 Email、Phone、Address 三项信息 #}
+{# 提示 5：检查所有标签是否正确闭合 #}`,
+    answer: String.raw`<!doctype html>
+<html lang="en">
+<head>
+    <title>MGW: {{ pageTitle }}</title>
+</head>
+<body>
+    {{ include('_header.html.twig') }}
+
+    <p>Contact us as follows:</p>
+    <dl>
+        <dt>Email</dt>
+        <dd>inquiries@securitydemo.com</dd>
+        <dt>Phone</dt>
+        <dd>+123 22-333-4444</dd>
+        <dt>Address</dt>
+        <dd>1 Main Street,<br>Newtown,<br>Ireland</dd>
+    </dl>
+</body>
+</html>`,
+    checks: [
+      { label: '用 include() 引入 _header.html.twig / correct include() call',
+        hint: '写法：{{ include(\'_header.html.twig\') }}',
+        test: c => /\{\{\s*include\s*\(\s*['"]_header\.html\.twig['"]\s*\)\s*\}\}/.test(c) },
+      { label: '完整 HTML5 页面骨架 / full HTML5 skeleton',
+        hint: '需要 doctype、html、head、body 及对应闭合标签',
+        test: all(/<!doctype\s+html>/i, /<html/i, /<head>/i, /<body>/i, /<\/html>/i) },
+      { label: 'title 中输出 pageTitle 变量 / print pageTitle',
+        hint: '需要 <title> 标签和 {{ pageTitle }} 变量输出',
+        test: c => /<title>/i.test(c) && /\{\{\s*pageTitle\s*\}\}/.test(c) },
+      { label: '定义列表结构 <dl> / <dt> / <dd> / definition list',
+        hint: '用 dl / dt / dd 写出 Email、Phone、Address 三项',
+        test: c => /<dl>/i.test(c) && /<dt>\s*Email\s*<\/dt>/i.test(c) && /<dt>\s*Phone\s*<\/dt>/i.test(c) && /<dt>\s*Address\s*<\/dt>/i.test(c) && /<\/dl>/i.test(c) },
+      { label: '联系信息取值正确 / correct contact values',
+        hint: '邮箱 inquiries@securitydemo.com、电话 +123 22-333-4444、地址含 Ireland',
+        test: c => /inquiries@securitydemo\.com/.test(c) && /\+123 22-333-4444/.test(c) && /Ireland/.test(c) }
+    ],
+    terminal: [
+      { t: '$ php tests/q1_include.php', c: 'cmd' },
+      { t: '[Twig] loading templates/contact.html.twig .......... OK', c: 'out' },
+      { t: "[Twig] include('_header.html.twig') ................. OK", c: 'ok' },
+      { t: '[Twig] pageTitle = "Contact Us" ..................... OK', c: 'out' },
+      { t: '<title>MGW: Contact Us</title>', c: 'html' },
+      { t: '<header> ... Home | Contact Us ... </header>', c: 'html' },
+      { t: '<dl> Email / Phone / Address ..................... OK', c: 'html' },
+      { t: 'PASS  Task 1: 5/5 checkpoints rendered (100%)', c: 'ok' }
+    ]
+  },
+
+  {
+    short: '继承 · Base',
+    title: 'Q2 · Twig: Template Inheritance — Base',
+    file: 'templates/base.html.twig',
+    lang: 'twig',
+    en: String.raw`// ============================================================
+// QUIZ-2  |  Task 2 of 5  |  Template Inheritance — BASE
+// ------------------------------------------------------------
+// Write the file: templates/base.html.twig
+//
+// A Twig base template is a COMPLETE HTML page in its own right,
+// but it contains empty (or default) blocks that child templates
+// will override.
+//
+// REQUIREMENTS
+//   1. A complete HTML5 page with <title>MGW: {{ pageTitle }}</title>.
+//   2. The shared <header> (logo + Home + Contact Us links).
+//   3. The shared <blockquote> site intro and <h1>{{ pageTitle }}</h1>.
+//   4. Declare an EMPTY block named "main" in the page body.
+//   5. Use {% block main %}{% endblock %} — no duplicate page code.
+// ============================================================`,
+    zh: `任务 2 — Twig：模板继承之基础模板（Base）
+请编写 templates/base.html.twig。
+
+模板继承的思路：先写一个基础模板，把一组网页共享的内容全部放进去；再让各个子模板去扩展（extend）它。Twig 的基础模板本身就是一个完整的 HTML 页面，只是里面带有默认或空白的 block（块），留给子模板覆盖。
+
+要求：
+① 完整 HTML5 页面，标题为 MGW: 加 pageTitle 变量。
+② 共用 <header>（logo、Home、Contact Us 链接）。
+③ 共用 <blockquote> 站点介绍，以及页面大标题。
+④ 在页面主体声明一个名为 main 的空块。
+⑤ 只用一对 block / endblock，不要重复整页代码。
+
+考点：base 模板是完整页面；block 是子模板的插入点。`,
+    given: String.raw`{# 参考：本任务把 Q1 的 _header.html.twig 内容直接放进基础模板 #}
+<header>
+    <img src="/images/logo.png" alt="logo" width="200px">
+    <ul>
+        <li><a href="/">Home</a></li>
+        <li><a href="/?action=contact">Contact Us</a></li>
+    </ul>
+</header>
+<blockquote>
+    <p><b>MGW.</b><br>You know it makes sense!</p>
+    <p>Welcome to My Great Website (MGW).</p>
+</blockquote>`,
+    starter: String.raw`{# 中文提示：在下面写 templates/base.html.twig，一个完整 HTML 页面 #}
+{# 提示 1：HTML5 骨架、title、共用页头、站点介绍、页面大标题 #}
+{# 提示 2：在页面主体留一个名为 main 的空块，给子模板覆盖 #}
+{# 提示 3：块用 block 与 endblock 成对出现，中间先留空 #}`,
+    answer: String.raw`<!doctype html>
+<html lang="en">
+<head>
+    <title>MGW: {{ pageTitle }}</title>
+</head>
+<body>
+    <header>
+        <img src="/images/logo.png" alt="logo" width="200px">
+        <ul>
+            <li><a href="/">Home</a></li>
+            <li><a href="/?action=contact">Contact Us</a></li>
+        </ul>
+    </header>
+
+    <blockquote>
+        <p><b>MGW.</b><br>You know it makes sense!</p>
+        <p>Welcome to My Great Website (MGW).</p>
+    </blockquote>
+
+    <h1>{{ pageTitle }}</h1>
+
+    {% block main %}{% endblock %}
+</body>
+</html>`,
+    checks: [
+      { label: '声明 main 块并正确闭合 / block main ... endblock',
+        hint: '需要 {% block main %} 与 {% endblock %} 成对出现',
+        test: c => /\{%\s*block\s+main\s*%\}/.test(c) && /\{%\s*endblock\s*%\}/.test(c) },
+      { label: '完整 HTML5 骨架 / full HTML5 skeleton',
+        hint: '需要 doctype、html、head、body 及闭合标签',
+        test: all(/<!doctype\s+html>/i, /<html/i, /<head>/i, /<body>/i, /<\/html>/i) },
+      { label: '使用 pageTitle 变量 / print pageTitle',
+        hint: 'title 与 h1 中应出现 {{ pageTitle }}',
+        test: c => /\{\{\s*pageTitle\s*\}\}/.test(c) && /<title>/i.test(c) },
+      { label: '共用页头 logo 与导航 / shared header and nav',
+        hint: '需要 <header>、logo.png 以及 action=contact 链接',
+        test: c => /<header>/i.test(c) && /images\/logo\.png/.test(c) && /action=contact/.test(c) },
+      { label: '站点介绍 blockquote / site intro',
+        hint: 'blockquote 中要有 You know it makes sense 与 Welcome to My Great Website',
+        test: c => /<blockquote>/i.test(c) && /You know it makes sense/.test(c) && /Welcome to My Great Website/.test(c) }
+    ],
+    terminal: [
+      { t: '$ php tests/q2_base.php', c: 'cmd' },
+      { t: '[Twig] parsing templates/base.html.twig ............. OK', c: 'out' },
+      { t: '[Twig] block "main" found (empty, overridable) ...... OK', c: 'ok' },
+      { t: '[HTML] doctype / head / header / blockquote .......... OK', c: 'out' },
+      { t: '[Twig] {{ pageTitle }} resolved = "Home" ............. OK', c: 'out' },
+      { t: 'PASS  Task 2: 5/5 checkpoints rendered (100%)', c: 'ok' }
+    ]
+  },
+
+  {
+    short: '继承 · Child',
+    title: 'Q3 · Twig: Template Inheritance — Child',
+    file: 'templates/contact.html.twig',
+    lang: 'twig',
+    en: String.raw`// ============================================================
+// QUIZ-2  |  Task 3 of 5  |  Template Inheritance — CHILD
+// ------------------------------------------------------------
+// Write the file: templates/contact.html.twig (a CHILD template)
+//
+// GIVEN: templates/base.html.twig already contains the whole
+//        HTML skeleton, header, intro and an EMPTY "main" block.
+//
+// REQUIREMENTS
+//   1. Start the file with extends 'base.html.twig'.
+//   2. Override ONLY the block named "main".
+//   3. Put the contact details INSIDE that block:
+//      <dl> Email / Phone / Address (values from class).
+//   4. Do NOT repeat the doctype, <html>, <head>, <body>.
+//   5. Do NOT repeat the shared <header> / <blockquote>.
+// ============================================================`,
+    zh: `任务 3 — Twig：模板继承之子模板（Child）
+请编写 templates/contact.html.twig（子模板）。基础模板 base.html.twig 已提供（见 Given），里面有完整 HTML 骨架、页头、介绍和一个空的 main 块。
+
+要求：
+① 文件以 extends 语句开头，指定基础模板 base.html.twig。
+② 只覆盖名为 main 的块，其它内容全部继承。
+③ 把联系信息（Email / Phone / Address）写进这个块里。
+④ 不要重复写 doctype、html、head、body 等整页骨架。
+⑤ 不要重复写共用的页头与站点介绍。
+
+考点：子模板只写自己独有的内容；extends 之后块外的内容会被忽略。`,
+    given: String.raw`{# ===== 已提供：templates/base.html.twig（节选） ===== #}
+<!doctype html>
+<html lang="en">
+<head><title>MGW: {{ pageTitle }}</title></head>
+<body>
+    <header> ... logo + Home / Contact Us ... </header>
+    <blockquote> ... Welcome to My Great Website ... </blockquote>
+    <h1>{{ pageTitle }}</h1>
+
+    {% block main %}{% endblock %}   {# 子模板在这里填充 #}
+</body>
+</html>`,
+    starter: String.raw`{# 中文提示：在下面写 templates/contact.html.twig（子模板） #}
+{# 提示 1：第一行用 extends 指定基础模板文件名（见左侧 Given） #}
+{# 提示 2：只覆盖基础模板中名为 main 的块 #}
+{# 提示 3：把定义列表形式的联系信息写进这个块里 #}
+{# 提示 4：不要重复写整页 HTML 骨架和共用页头 #}`,
+    answer: String.raw`{% extends 'base.html.twig' %}
+
+{% block main %}
+    <p>Contact us as follows:</p>
+    <dl>
+        <dt>Email</dt>
+        <dd>inquiries@securitydemo.com</dd>
+        <dt>Phone</dt>
+        <dd>+123 22-333-4444</dd>
+        <dt>Address</dt>
+        <dd>1 Main Street,<br>Newtown,<br>Ireland</dd>
+    </dl>
+{% endblock %}`,
+    checks: [
+      { label: "使用 extends 'base.html.twig' / extends the base",
+        hint: "写法：{% extends 'base.html.twig' %}",
+        test: c => /\{%\s*extends\s+['"]base\.html\.twig['"]\s*%\}/.test(c) },
+      { label: '模板以 extends 语句开头 / extends comes first',
+        hint: '子模板第一行应是 extends，不要在它前面写 HTML',
+        test: c => /^\s*\{%\s*extends/.test(c) },
+      { label: '覆盖 main 块且有内容 / override block main',
+        hint: '需要 {% block main %} 内容 {% endblock %}',
+        test: c => /\{%\s*block\s+main\s*%\}[\s\S]+\{%\s*endblock\s*%\}/.test(c) },
+      { label: '块内联系信息完整 / contact details inside block',
+        hint: '块内需要 dl、Email / Phone / Address 及对应取值',
+        test: c => /<dl>/i.test(c) && /inquiries@securitydemo\.com/.test(c) && /\+123 22-333-4444/.test(c) && /Ireland/.test(c) },
+      { label: '不重复 HTML 骨架与页头 / no duplicated skeleton',
+        hint: '子模板不应再写 <!doctype html> 或 <header>，这些都由 base 提供',
+        test: c => /\{%\s*block\s+main\s*%\}/.test(c) && !/<!doctype\s+html>/i.test(c) && !/<header>/i.test(c) && !/<blockquote>/i.test(c) }
+    ],
+    terminal: [
+      { t: '$ php tests/q3_child.php', c: 'cmd' },
+      { t: "[Twig] extends 'base.html.twig' ...................... OK", c: 'ok' },
+      { t: '[Twig] block "main" overridden by child ............... OK', c: 'ok' },
+      { t: '[HTML] skeleton inherited from base .................... OK', c: 'out' },
+      { t: '<h1>Contact Us</h1>', c: 'html' },
+      { t: '<dl><dt>Email</dt><dd>inquiries@securitydemo.com</dd> ...', c: 'html' },
+      { t: 'PASS  Task 3: 5/5 checkpoints rendered (100%)', c: 'ok' }
+    ]
+  },
+
+  {
+    short: 'Application 类',
+    title: 'Q4 · Twig: Application Class & render()',
+    file: 'src/Application.php',
+    lang: 'php',
+    en: String.raw`// ============================================================
+// QUIZ-2  |  Task 4 of 5  |  Application Class + render()
+// ------------------------------------------------------------
+// Write the file: src/Application.php  (namespace Mattsmithdev)
+//
+// This class initializes the Twig Environment and provides a
+// run() method that renders a page.
+//
+// REQUIREMENTS
+//   1. <?php, namespace Mattsmithdev; and BOTH use statements:
+//        use Twig\Loader\FilesystemLoader;
+//        use Twig\Environment;
+//   2. A PATH_TO_TEMPLATES constant using __DIR__.'/../templates'.
+//   3. __construct(): create FilesystemLoader, then Environment.
+//   4. run(): build an $args array with keys name, meals, product.
+//   5. run(): $html = $this->twig->render($template, $args);
+//             then print $html;
+// ============================================================`,
+    zh: `任务 4 — Twig：Application 类与 render()
+请编写 src/Application.php（命名空间 Mattsmithdev）。
+
+这个类负责初始化 Twig 环境，并提供 run() 方法渲染页面。入口 index.php 只需要 require vendor/autoload.php，然后 new Application()->run()。
+
+要求：
+① <?php 开头、声明命名空间，并 use 两个 Twig 类（FilesystemLoader、Environment）。
+② 用常量 PATH_TO_TEMPLATES 配合 __DIR__ 指向 templates 目录。
+③ 构造方法中先创建 FilesystemLoader，再创建 Environment 实例。
+④ run() 中准备参数数组 $args，键至少包含 name、meals、product。
+⑤ run() 中调用 render($template, $args) 得到 $html，并 print 输出。
+
+考点：Composer PSR-4 自动加载；Environment + FilesystemLoader；render() 的两个参数（模板文件名 + 参数数组）；模型与视图分离。`,
+    given: String.raw`// ===== 已提供：public/index.php =====
+<?php
+require_once __DIR__ . '/../vendor/autoload.php';
+use Mattsmithdev\Application;
+$app = new Application();
+$app->run();
+
+// ===== 已提供：templates/demo.html.twig =====
+// Hello {{ name }}
+// for dinner you will have {{ meals.dinner }}
+// the price of {{ product.getDescription() }} is ${'$'}{{ product.price }}
+
+// ===== 已提供：composer.json =====
+// { "autoload": { "psr-4": { "Mattsmithdev\\": "src" } },
+//   "require": { "twig/twig": "^3.10" } }`,
+    starter: String.raw`<?php
+// 中文提示：在下面写 src/Application.php
+// 提示 1：声明命名空间，并引入两个 Twig 类
+// 提示 2：用常量保存模板目录路径
+// 提示 3：构造方法中创建加载器与环境对象
+// 提示 4：run() 中准备参数数组、调用渲染方法、输出结果`,
+    answer: String.raw`<?php
+namespace Mattsmithdev;
+
+use Twig\Loader\FilesystemLoader;
+use Twig\Environment;
+
+class Application
+{
+    const PATH_TO_TEMPLATES = __DIR__ . '/../templates';
+
+    private Environment $twig;
+
+    public function __construct()
+    {
+        $loader = new FilesystemLoader(self::PATH_TO_TEMPLATES);
+        $this->twig = new Environment($loader);
+    }
+
+    public function run()
+    {
+        $meals = [
+            'breakfast' => 'toast',
+            'lunch'     => 'salad',
+            'dinner'    => 'fish and chips',
+        ];
+
+        $product1 = new Product();
+        $product1->setDescription('bag of nails');
+        $product1->setPrice(18.99);
+
+        $template = 'demo.html.twig';
+        $args = [
+            'name'    => 'matt',
+            'meals'   => $meals,
+            'product' => $product1,
+        ];
+
+        $html = $this->twig->render($template, $args);
+        print $html;
+    }
+}`,
+    checks: [
+      { label: 'PHP 开头与命名空间 / <?php + namespace Mattsmithdev',
+        hint: '需要 <?php 和 namespace Mattsmithdev;',
+        test: c => /<\?php/.test(c) && /namespace\s+Mattsmithdev\s*;/.test(c) },
+      { label: '引入两个 Twig 类 / both use statements',
+        hint: '需要 use Twig\\Loader\\FilesystemLoader; 与 use Twig\\Environment;',
+        test: c => /use\s+Twig\\Loader\\FilesystemLoader\s*;/.test(c) && /use\s+Twig\\Environment\s*;/.test(c) },
+      { label: '模板路径常量与加载器 / constant + FilesystemLoader',
+        hint: '需要 PATH_TO_TEMPLATES、__DIR__ 与 new FilesystemLoader(...)',
+        test: c => /PATH_TO_TEMPLATES/.test(c) && /__DIR__/.test(c) && /new\s+FilesystemLoader\s*\(/.test(c) },
+      { label: '创建 Environment 实例 / new Environment(...)',
+        hint: '构造方法中要 new Environment($loader) 并保存到属性',
+        test: c => /new\s+Environment\s*\(/.test(c) && /private\s+Environment\s+\$twig/.test(c) },
+      { label: 'render() 传参并输出 / render($template, $args) + print',
+        hint: '$args 需含 name / meals / product；调用 render 后 print $html',
+        test: c => /->\s*render\s*\(\s*\$template\s*,\s*\$args\s*\)/.test(c) && /print\s+\$html/.test(c) && /['"]name['"]\s*=>/.test(c) && /['"]meals['"]\s*=>/.test(c) && /['"]product['"]\s*=>/.test(c) }
+    ],
+    terminal: [
+      { t: '$ cd ~/Downloads/CSIS3280-week07/3280week07_starter', c: 'cmd' },
+      { t: '$ composer dump-autoload', c: 'cmd' },
+      { t: 'Generated autoload files containing Mattsmithdev\\Application', c: 'ok' },
+      { t: '$ php public/index.php', c: 'cmd' },
+      { t: '[Twig] FilesystemLoader -> ../templates ............... OK', c: 'out' },
+      { t: '[Twig] Environment ready; render("demo.html.twig") .... OK', c: 'ok' },
+      { t: '<p>Hello matt</p>', c: 'html' },
+      { t: '<p>for dinner you will have fish and chips</p>', c: 'html' },
+      { t: '<p>the price of bag of nails is $18.99</p>', c: 'html' },
+      { t: 'PASS  Task 4: 5/5 checkpoints rendered (100%)', c: 'ok' }
+    ]
+  },
+
+  {
+    short: 'Blade 布局继承',
+    title: 'Q5 · Blade: Master Layout & Child View',
+    file: 'layouts/master.blade.php + child.blade.php',
+    lang: 'blade',
+    en: String.raw`// ============================================================
+// QUIZ-2  |  Task 5 of 5  |  Blade: Master Layout + Child
+// ------------------------------------------------------------
+// Write TWO files in the SAME editor, separated by comments:
+//   A) layouts/master.blade.php   (the master layout)
+//   B) child.blade.php            (the child view)
+//
+// REQUIREMENTS
+//   1. The child extends the master with dot notation:
+//        @extends('layouts.master')  ->  layouts/master.blade.php
+//   2. Master: @yield('title') in <title>, @yield('content') in body.
+//   3. Master: @section('sidebar') ... @show for the default sidebar.
+//   4. Child: @section('title', 'Page Title'), and
+//             @section('content') ... @endsection.
+//   5. Child: @parent to append the sidebar, and print a variable
+//      with ESCAPED output {{ $userName }} (never {!! ... !!}).
+// ============================================================`,
+    zh: `任务 5 — Blade：主布局与子模板
+请在同一个编辑框里写两个文件，用 Blade 注释分隔：A) layouts/master.blade.php（主布局），B) child.blade.php（子模板）。
+
+要求：
+① 子模板用点号命名扩展主布局：@extends('layouts.master') 对应 layouts/master.blade.php（也可用 layouts.main.home 对应更深路径）。
+② 主布局在 <title> 中用 @yield('title')，在主体用 @yield('content')。
+③ 主布局用 @section('sidebar') ... @show 定义默认侧栏。
+④ 子模板用 @section('title', 'Page Title') 及 @section('content') ... @endsection 填充内容。
+⑤ 子模板用 @parent 追加侧栏内容；变量用转义输出 {{ $userName }}，不要用不安全的原样输出。
+
+考点：filename.blade.php 命名约定；@section 类似 Twig 的 block；{{ }} 转义 / {!! !!} 原样；Blade 允许写 PHP，安全性弱于 Twig。`,
+    given: String.raw`{{-- 参考：Blade 文件命名与目录对应关系 --}}
+layouts.master      -> layouts/master.blade.php
+layouts.main.home   -> layouts/main/home.blade.php
+
+{{-- 参考：Laravel 官方 master 布局写法 --}}
+@section('sidebar')
+    This is the master sidebar.
+@show
+
+<div class="container">
+    @yield('content')
+</div>
+
+{{-- 输出方式 --}}
+{{ $var }}     转义输出（推荐）
+{!! $var !!}   原样输出（有 XSS 风险，本题不要用）`,
+    starter: String.raw`{{-- 中文提示：本题写两个文件，都写在同一个编辑框里，用注释分隔 --}}
+
+{{-- ===== 文件 A：layouts/master.blade.php（主布局） ===== --}}
+{{-- 提示 1：完整 HTML 骨架，title 处放一个占位，主体放内容占位 --}}
+{{-- 提示 2：用 section 与 show 定义默认侧栏 --}}
+
+
+{{-- ===== 文件 B：child.blade.php（子模板） ===== --}}
+{{-- 提示 3：第一行用点号命名扩展主布局 --}}
+{{-- 提示 4：用 section 填充标题和内容，用 parent 追加侧栏 --}}
+{{-- 提示 5：内容里用转义方式输出一个变量 --}}`,
+    answer: String.raw`{{-- ===== layouts/master.blade.php ===== --}}
+<!doctype html>
+<html lang="en">
+<head>
+    <title>App Name - @yield('title')</title>
+</head>
+<body>
+    @section('sidebar')
+        This is the master sidebar.
+    @show
+
+    <div class="container">
+        @yield('content')
+    </div>
+</body>
+</html>
+
+{{-- ===== child.blade.php ===== --}}
+@extends('layouts.master')
+
+@section('title', 'Page Title')
+
+@section('sidebar')
+    @parent
+    <p>This is appended to the master sidebar.</p>
+@endsection
+
+@section('content')
+    <p>This is my body content.</p>
+    <p>Hello, {{ $userName }}</p>
+@endsection`,
+    checks: [
+      { label: "点号命名扩展主布局 / @extends('layouts.master')",
+        hint: "写法：@extends('layouts.master')，对应 layouts/master.blade.php",
+        test: c => /@extends\s*\(\s*['"]layouts\.master['"]\s*\)/.test(c) },
+      { label: '主布局两个占位 / @yield(title) + @yield(content)',
+        hint: "需要 @yield('title') 与 @yield('content')",
+        test: c => /@yield\s*\(\s*['"]title['"]\s*\)/.test(c) && /@yield\s*\(\s*['"]content['"]\s*\)/.test(c) },
+      { label: '默认侧栏 / @section(sidebar) ... @show',
+        hint: "主布局里用 @section('sidebar') 与 @show 定义默认内容",
+        test: c => /@section\s*\(\s*['"]sidebar['"]\s*\)/.test(c) && /@show/.test(c) },
+      { label: '子模板填充标题与内容 / @section + @endsection',
+        hint: "需要 @section('title', '...') 与 @section('content') ... @endsection",
+        test: c => /@section\s*\(\s*['"]title['"]\s*,\s*['"][^'"]+['"]\s*\)/.test(c) && /@section\s*\(\s*['"]content['"]\s*\)/.test(c) && /@endsection/.test(c) },
+      { label: '@parent 追加 + 转义变量输出 / no raw output',
+        hint: '需要 @parent 与 {{ $变量名 }}；不要使用不安全的原样输出',
+        test: c => /@parent/.test(c) && /\{\{\s*\$[A-Za-z_]\w*\s*\}\}/.test(c) && !/\{!!/.test(c) }
+    ],
+    terminal: [
+      { t: '$ php artisan view:cache', c: 'cmd' },
+      { t: 'Blade: compiled layouts/master.blade.php ............ OK', c: 'out' },
+      { t: "Blade: child extends 'layouts.master' ................ OK", c: 'ok' },
+      { t: "Blade: @section('content') + @parent merged .......... OK", c: 'ok' },
+      { t: '<title>App Name - Page Title</title>', c: 'html' },
+      { t: '<p>This is my body content.</p>', c: 'html' },
+      { t: '<p>Hello, matt</p>   {{ $userName }} auto-escaped', c: 'html' },
+      { t: 'PASS  Task 5: 5/5 checkpoints rendered (100%)', c: 'ok' }
+    ]
+  }
+];
+
+const FULL_LINES = [
+  { t: '$ cd ~/Downloads/CSIS3280-week07/3280week07_starter', c: 'cmd' },
+  { t: '$ composer require twig/twig', c: 'cmd' },
+  { t: '  - Installing twig/twig (v3.10.0): Extracting archive', c: 'out' },
+  { t: '  Writing lock file / Generating autoload files', c: 'out' },
+  { t: '$ composer dump-autoload', c: 'cmd' },
+  { t: 'Generated autoload files containing Mattsmithdev\\Application', c: 'ok' },
+  { t: '$ php -S localhost:8000 -t public', c: 'cmd' },
+  { t: '[Sun Nov  8 09:00:00 2026] PHP 8.3 Development Server (http://localhost:8000) started', c: 'out' },
+  { t: '$ curl -s "http://localhost:8000/?action=contact"', c: 'cmd' },
+  { t: '<!doctype html>', c: 'html' },
+  { t: '<html lang="en"><head><title>MGW: Contact Us</title></head>', c: 'html' },
+  { t: '<body> <header> logo | Home | Contact Us </header>', c: 'html' },
+  { t: '<blockquote> MGW. You know it makes sense! </blockquote>', c: 'html' },
+  { t: '<h1>Contact Us</h1>', c: 'html' },
+  { t: '<dl> Email: inquiries@securitydemo.com / Phone: +123 22-333-4444 / Address: Ireland </dl>', c: 'html' },
+  { t: '</body></html>', c: 'html' },
+  { t: '[OK] FilesystemLoader -> Environment -> base.html.twig -> extends -> block main -> render()', c: 'ok' },
+  { t: '[OK] 5 个任务文件全部加载；最终页面渲染成功 (200 OK)', c: 'ok' }
+];
+
+let current = 0;
+let drafts = QUESTIONS.map(q => q.starter);
+let best = QUESTIONS.map(() => 0);
+let results = QUESTIONS.map(() => null);
+let runToken = 0;
+const STORE = 'quiz2_v1';
+
+function loadState() {
+  try {
+    const d = JSON.parse(localStorage.getItem(STORE) || '{}');
+    if (Array.isArray(d.drafts)) d.drafts.forEach((v, i) => { if (typeof v === 'string') drafts[i] = v; });
+    if (Array.isArray(d.best)) d.best.forEach((v, i) => { if (typeof v === 'number') best[i] = v; });
+  } catch (e) { /* ignore */ }
+}
+function saveState() {
+  try { localStorage.setItem(STORE, JSON.stringify({ drafts, best })); } catch (e) { /* ignore */ }
+}
+
+function updateStats() {
+  const done = best.filter(s => s > 0).length;
+  const total = best.reduce((a, b) => a + b, 0);
+  $('statDone').textContent = done + ' / ' + QUESTIONS.length;
+  $('statTotal').textContent = total + ' / ' + (QUESTIONS.length * 100);
+  $('statAvg').textContent = Math.round(total / QUESTIONS.length);
+}
+
+function renderTabs() {
+  const box = $('tabs');
+  box.innerHTML = '';
+  QUESTIONS.forEach((q, i) => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'tab' + (i === current ? ' active' : '');
+    b.innerHTML = '<span class="tab-n">Q' + (i + 1) + '</span><span class="tab-t"></span><span class="tab-s"></span>';
+    b.querySelector('.tab-t').textContent = q.short;
+    b.querySelector('.tab-s').textContent = best[i] ? best[i] + '分' : '—';
+    b.addEventListener('click', () => select(i));
+    box.appendChild(b);
+  });
+  updateStats();
+}
+
+function select(i) {
+  drafts[current] = $('editor').value;
+  saveState();
+  current = i;
+  runToken++;
+  renderTabs();
+  renderQuestion();
+}
+
+function renderQuestion() {
+  const q = QUESTIONS[current];
+  $('qTitle').innerHTML = '';
+  $('qTitle').appendChild(document.createTextNode(q.title + ' '));
+  const small = document.createElement('small');
+  small.textContent = 'Question';
+  $('qTitle').appendChild(small);
+  $('enSpec').textContent = q.en;
+  $('zhSpec').textContent = q.zh;
+  $('given').textContent = q.given;
+  $('fileName').textContent = q.file;
+  $('langChip').textContent = q.lang;
+  $('editor').value = drafts[current];
+  $('answerBox').classList.add('hidden');
+  $('answerBtn').textContent = '显示正确答案';
+  $('answerCode').textContent = q.answer;
+  renderResult();
+  $('termBody').innerHTML = '<div class="term-line term-idle">$ 等待运行测试…（点击「检查代码」后再点「运行测试」）</div>';
+  $('termBody').classList.remove('typing');
+}
+
+function esc(s) {
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+function renderResult() {
+  const r = results[current];
+  const box = $('result');
+  if (!r) { box.classList.add('hidden'); box.innerHTML = ''; return; }
+  const q = QUESTIONS[current];
+  let html = '<div class="result-head"><div class="score">' + r.score + '<span> / 100</span></div>' +
+    '<div class="score-tag">' + r.passed.filter(Boolean).length + ' / ' + q.checks.length + ' 个检查点通过</div></div>' +
+    '<div class="bar"><i style="width:' + r.score + '%"></i></div><ul class="check-list">';
+  q.checks.forEach((ch, i) => {
+    const ok = r.passed[i];
+    html += '<li><span class="' + (ok ? 'ok' : 'no') + '">' + (ok ? '✓' : '✗') + '</span> ' +
+      '<span class="ck-label">' + esc(ch.label) + '</span>' +
+      (ok ? '' : '<span class="ck-hint">提示：' + esc(ch.hint) + '</span>') + '</li>';
+  });
+  html += '</ul>';
+  box.innerHTML = html;
+  box.classList.remove('hidden');
+}
+
+function checkCode() {
+  const code = $('editor').value;
+  drafts[current] = code;
+  const q = QUESTIONS[current];
+  const passed = q.checks.map(ch => {
+    try { return !!ch.test(code); } catch (e) { return false; }
+  });
+  const score = Math.round(passed.filter(Boolean).length / q.checks.length * 100);
+  results[current] = { score, passed };
+  if (score > best[current]) best[current] = score;
+  saveState();
+  renderTabs();
+  renderResult();
+  $('result').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function typeLines(el, lines, token) {
+  el.innerHTML = '';
+  el.classList.add('typing');
+  let li = 0, ci = 0, cur = null;
+  function step() {
+    if (token !== runToken) return;
+    if (li >= lines.length) { el.classList.remove('typing'); return; }
+    if (!cur) {
+      cur = document.createElement('div');
+      cur.className = 'term-line ' + (lines[li].c || 'out');
+      el.appendChild(cur);
+    }
+    const text = lines[li].t;
+    const chunk = Math.max(1, Math.ceil(text.length / 45));
+    if (ci < text.length) {
+      cur.textContent += text.substr(ci, chunk);
+      ci += chunk;
+      el.scrollTop = el.scrollHeight;
+      setTimeout(step, 18);
+    } else {
+      li++; ci = 0; cur = null;
+      setTimeout(step, 110);
+    }
+  }
+  step();
+}
+
+function runTest() {
+  const token = ++runToken;
+  const r = results[current];
+  let lines;
+  if (!r) {
+    lines = [{ t: '$ 请先点击「✓ 检查代码」再运行测试', c: 'warn' }];
+  } else if (r.score < 100) {
+    lines = [{ t: '! 当前完成度 ' + r.score + '%，以下为完整程序的参考输出（模拟）', c: 'warn' }]
+      .concat(QUESTIONS[current].terminal);
+  } else {
+    lines = QUESTIONS[current].terminal;
+  }
+  typeLines($('termBody'), lines, token);
+}
+
+function runFull() {
+  const token = ++runToken;
+  $('preview').classList.add('hidden');
+  typeLines($('fullTermBody'), FULL_LINES, token);
+  setTimeout(() => {
+    if (token === runToken) $('preview').classList.remove('hidden');
+  }, FULL_LINES.reduce((n, l) => n + 180 + Math.ceil(l.t.length / 45) * 18, 0));
+}
+
+$('checkBtn').addEventListener('click', checkCode);
+$('answerBtn').addEventListener('click', function () {
+  const box = $('answerBox');
+  box.classList.toggle('hidden');
+  this.textContent = box.classList.contains('hidden') ? '显示正确答案' : '隐藏正确答案';
+});
+$('runBtn').addEventListener('click', runTest);
+$('resetBtn').addEventListener('click', function () {
+  drafts[current] = '';
+  results[current] = null;
+  $('editor').value = '';
+  renderResult();
+  saveState();
+  $('editor').focus();
+});
+$('fullBtn').addEventListener('click', runFull);
+$('fullResetBtn').addEventListener('click', function () {
+  ++runToken;
+  $('fullTermBody').classList.remove('typing');
+  $('fullTermBody').innerHTML = '<div class="term-line term-idle">$ 等待运行完整程序…</div>';
+  $('preview').classList.add('hidden');
+});
+$('editor').addEventListener('input', function () {
+  drafts[current] = this.value;
+  saveState();
+});
+
+loadState();
+renderTabs();
+renderQuestion();
+</script>
+
+</body>
+</html>
